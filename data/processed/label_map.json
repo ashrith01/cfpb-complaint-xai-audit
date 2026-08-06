@@ -1,0 +1,32 @@
+{
+  "label2id": {
+    "Credit reporting or other personal consumer reports": 0,
+    "Debt collection": 1,
+    "Checking or savings account": 2,
+    "Credit card": 3,
+    "Money transfer, virtual currency, or money service": 4,
+    "Mortgage": 5,
+    "Vehicle loan or lease": 6,
+    "Student loan": 7
+  },
+  "id2label": {
+    "0": "Credit reporting or other personal consumer reports",
+    "1": "Debt collection",
+    "2": "Checking or savings account",
+    "3": "Credit card",
+    "4": "Money transfer, virtual currency, or money service",
+    "5": "Mortgage",
+    "6": "Vehicle loan or lease",
+    "7": "Student loan"
+  },
+  "short_labels": {
+    "Credit reporting or other personal consumer reports": "credit_reporting",
+    "Debt collection": "debt_collection",
+    "Checking or savings account": "checking_savings",
+    "Credit card": "credit_card",
+    "Money transfer, virtual currency, or money service": "money_transfer",
+    "Mortgage": "mortgage",
+    "Vehicle loan or lease": "vehicle_loan",
+    "Student loan": "student_loan"
+  }
+}

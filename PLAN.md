@@ -3,13 +3,27 @@
 Derived from `BRD.md`. Check off as you go. Each day's "Definition of done"
 is the gate — don't start the next day until it's met.
 
-## Day 1 — Data prep
-- [ ] Download CFPB Consumer Complaint Database (bulk CSV or API)
-- [ ] Filter to 6–8 chosen product categories (decide and hardcode the list in `src/data_prep.py`)
-- [ ] Clean: strip boilerplate/redaction placeholders (`XXXX`), drop empty narratives, dedupe
-- [ ] Stratified train/val/test split, seeded, saved to `data/splits.json`
-- [ ] Subsample to ~30–40k narratives total
-- **DoD:** `data/processed/` populated, class balance table in a notebook cell or printed to console
+## Day 1 — Data prep ✅
+- [x] Download CFPB Consumer Complaint Database (bulk CSV or API)
+- [x] Filter to 6–8 chosen product categories (decide and hardcode the list in `src/data_prep.py`)
+- [x] Clean: strip boilerplate/redaction placeholders (`XXXX`), drop empty narratives, dedupe
+- [x] Stratified train/val/test split, seeded, saved to `data/splits.json`
+- [x] Subsample to ~30–40k narratives total
+- **DoD:** ✅ `data/processed/` populated (36,000 rows, 8 classes × 4,500), class balance
+  table printed by `make data`
+
+**Outcome:** 16.9M complaints → 3.83M with narratives → 2.11M in-window/in-category →
+983,364 after cleaning + dedupe → 36,000 sampled (25,200 / 5,400 / 5,400).
+Dedupe removed **52% of eligible narratives** — mass-filed credit-repair template letters
+that become identical once redaction placeholders are stripped. Credit reporting alone
+fell from ~1.5M to 535k. Without this the majority class would have been near-duplicate
+boilerplate, leaking across the split and inflating both test metrics and the
+faithfulness audit.
+
+Scope decision: restricted to complaints received on/after **2024-01-01**, which pins the
+`Product` column to a single taxonomy revision. The full history carries 21 product values
+across several revisions (three different names for "credit reporting" alone); the date
+filter yields 8 clean classes with no merge table to maintain.
 
 ## Day 2 — Baseline
 - [ ] TF-IDF + Logistic Regression baseline

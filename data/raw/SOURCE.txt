@@ -1,0 +1,5 @@
+url: https://files.consumerfinance.gov/ccdb/complaints.csv.zip
+bytes: 1409348515
+last_modified: Thu, 06 Aug 2026 09:50:41 GMT
+member: complaints.csv (9.06 GB uncompressed)
+fetched: 2026-08-06
