@@ -25,10 +25,24 @@ Scope decision: restricted to complaints received on/after **2024-01-01**, which
 across several revisions (three different names for "credit reporting" alone); the date
 filter yields 8 clean classes with no merge table to maintain.
 
-## Day 2 — Baseline
-- [ ] TF-IDF + Logistic Regression baseline
-- [ ] Report accuracy + macro-F1 on val set
-- **DoD:** baseline number written down in `results/metrics.json` — this is the floor to beat
+## Day 2 — Baseline ✅
+- [x] TF-IDF + Logistic Regression baseline
+- [x] Report accuracy + macro-F1 on val set
+- **DoD:** ✅ baseline written to `results/metrics.json` under `baseline`
+
+**Val accuracy 0.8437 · macro-F1 0.8445** (1–2 gram TF-IDF, 185,763 features,
+untuned LogReg, 11.6s fit).
+
+⚠️ **This raises the bar.** BRD §9 lists a ≥0.75 macro-F1 target, but the same row
+says "establish baseline first, beat it" — and a bag-of-words model already clears
+0.75 comfortably. **The operative target for Day 3–4 is >0.8445, not 0.75.** Hitting
+0.75 with DistilBERT would be a regression dressed up as success.
+
+Per-class F1 splits cleanly into easy and hard classes, which sets up Day 5:
+mortgage (0.949) and student_loan (0.940) are near-solved by keyword presence,
+while checking_savings (0.784), credit_reporting (0.791) and debt_collection
+(0.799) are the confusable core. Expect the fine-tune's gain — and the most
+interesting explanation-faithfulness behaviour — to concentrate there.
 
 ## Day 3–4 — Fine-tune
 - [ ] `src/train.py`: DistilBERT sequence classification head

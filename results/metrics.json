@@ -1,0 +1,35 @@
+{
+  "baseline": {
+    "config": {
+      "C": 1.0,
+      "max_features": 300000,
+      "max_iter": 2000,
+      "min_df": 3,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "sublinear_tf": true
+    },
+    "fit_seconds": 11.6,
+    "model": "tfidf+logreg",
+    "n_features": 185763,
+    "n_train": 25200,
+    "n_val": 5400,
+    "seed": 42,
+    "val": {
+      "accuracy": 0.8437037037037037,
+      "macro_f1": 0.8444713577611378,
+      "per_class_f1": {
+        "checking_savings": 0.7841726618705036,
+        "credit_card": 0.8107302533532041,
+        "credit_reporting": 0.7909604519774012,
+        "debt_collection": 0.799110452186805,
+        "money_transfer": 0.824773413897281,
+        "mortgage": 0.9487750556792873,
+        "student_loan": 0.9396681749622926,
+        "vehicle_loan": 0.8575803981623277
+      }
+    }
+  }
+}
