@@ -9,13 +9,13 @@ the code afterwards.
 - **Day-by-day checklist:** [`PLAN.md`](./PLAN.md)
 - **Final polished report:** [`README.md`](./README.md) (written Day 12)
 
-**Status:** Day 3–4 in progress (fine-tune). Days 1–2 complete.
+**Status:** Days 1–4 complete. Day 5 (error analysis) next.
 
 | Day | Work | Status | Key number |
 |---|---|---|---|
 | 1 | Data prep | ✅ | 36,000 narratives, 8 classes × 4,500 |
-| 2 | TF-IDF + LogReg baseline | ✅ | val macro-F1 **0.8445** |
-| 3–4 | Fine-tune DistilBERT | 🚧 | target: **>0.8445** |
+| 2 | TF-IDF + LogReg baseline | ✅ | test macro-F1 **0.8411** |
+| 3–4 | Fine-tune DistilBERT | ✅ | test macro-F1 **0.8495** (+0.0084) |
 | 5 | Error analysis | ⬜ | |
 | 6–7 | Integrated Gradients + SHAP | ⬜ | |
 | 8 | Attention rollout | ⬜ | |
@@ -176,6 +176,115 @@ debug on Day 10.
 
 ---
 
-## Day 3–4 — Fine-tune 🚧
+## Day 3–4 — Fine-tune ✅
 
-In progress.
+DistilBERT-base-uncased with a sequence-classification head, plain PyTorch loop
+on MPS. Total grid runtime ~2h10m on the M4 Pro.
+
+### Grid (selected on val macro-F1)
+
+| # | lr | max_len | batch | best val macro-F1 | best epoch | time |
+|---|---|---|---|---|---|---|
+| **1** | **5e-5** | **256** | **16** | **0.8527** | **2** | 56 min |
+| 2 | 2e-5 | 256 | 16 | 0.8497 | 3 | 56 min |
+| 3 | 5e-5 | 128 | 32 | 0.8430 | 3 | 26 min |
+
+### Held-out test result (touched once, with the already-selected model)
+
+| | TF-IDF + LogReg | DistilBERT | delta |
+|---|---|---|---|
+| accuracy | 0.8400 | 0.8496 | +0.0096 |
+| **macro-F1** | **0.8411** | **0.8495** | **+0.0084** |
+
+**A fine-tuned transformer beats a bag-of-words baseline by 0.8 points of
+macro-F1** on this task — after ~2 hours of training versus 11 seconds.
+
+### Correction made during this step
+
+The first run printed `delta +0.0050 BEATS baseline`, comparing DistilBERT's
+**test** score against the baseline's **val** score — two different splits. The
+baseline is now scored on both, and the comparison above is like-for-like. This
+costs no validity: the baseline config is fixed and untuned, so nothing is being
+selected on test.
+
+The corrected gap (+0.0084) is slightly *larger* than the incorrect one, because
+both models lose ground from val to test. But the error could just as easily have
+run the other way and manufactured a win, and this comparison is the number the
+whole project rests on.
+
+### Decisions
+
+**Best epoch, not last.** Config 1 peaked at epoch 2 (0.8527) and *declined* at
+epoch 3 (0.8504) while train loss kept falling 0.42 → 0.28 — textbook overfitting.
+Keeping the last epoch would have shipped a measurably worse model. This also
+makes `epochs` redundant as a grid axis: a 3-epoch run yields the 1- and 2-epoch
+results for free, so the grid spends its slots on learning rate and sequence
+length instead.
+
+**Plain PyTorch loop rather than HF `Trainer`.** transformers 5.14.1 is a major
+version above what the scaffolding assumed, and `Trainer` is where that churn
+would bite. The Day 6–8 explainers need direct access to the embedding layer for
+Integrated Gradients regardless.
+
+**Benchmarked before launching.** ~46 min per 256-token config measured on 40
+steps, so the 2-hour cost was known upfront rather than discovered at hour three.
+
+### Sequence length matters more than learning rate
+
+Config 3 (128 tokens) scored **0.8430 — below the 0.8445 val baseline**. Halving
+the context turned the transformer into a *worse-than-bag-of-words* model, while
+halving the learning rate cost only 0.003. Median narrative length is ~898
+characters, so a 128-token window truncates away roughly half of a typical
+complaint.
+
+### Where the gain actually landed
+
+| class | baseline | DistilBERT | delta |
+|---|---|---|---|
+| vehicle_loan | 0.8785 | 0.8978 | +0.0192 |
+| credit_reporting | 0.7684 | 0.7840 | +0.0157 |
+| mortgage | 0.9227 | 0.9381 | +0.0154 |
+| money_transfer | 0.8227 | 0.8324 | +0.0097 |
+| debt_collection | 0.7958 | 0.7988 | +0.0030 |
+| credit_card | 0.8090 | 0.8114 | +0.0025 |
+| checking_savings | 0.7949 | 0.7972 | +0.0023 |
+| student_loan | 0.9367 | 0.9362 | −0.0005 |
+
+The gain is not uniform, and it is *not* concentrated where Day 2 predicted. The
+confusable core (checking_savings, debt_collection, credit_card) barely moved —
++0.003 or less. DistilBERT's advantage came from credit_reporting and
+vehicle_loan instead. **The classes that are hard for bag-of-words are, for the
+most part, hard for the transformer too**, which suggests the difficulty is
+genuine label ambiguity rather than a modelling shortfall.
+
+### Confusion structure (`results/figures/confusion_matrix.png`)
+
+Off-diagonal mass is concentrated in three places:
+
+- **money_transfer → checking_savings, 0.16** — the single largest confusion. A
+  complaint about a transfer from a bank account is genuinely both.
+- **credit_reporting ↔ debt_collection, 0.10 / 0.09** — near-symmetric, the
+  signature of genuine overlap rather than a one-way bias. A collections account
+  appearing on a credit report is one event filed under two products.
+- **credit_card → checking_savings, 0.08**
+
+Best-classified: student_loan 0.96, mortgage 0.93, vehicle_loan 0.90 — each has a
+distinctive vocabulary.
+
+This structure is the input to Day 5, and it sets up the real question for Days
+9–10: **on the ~20% of cases the model gets wrong, and on the confusable pairs
+above, do the explanation methods agree about what drove the decision?** Those
+are exactly the predictions where a faithful explanation would be worth having —
+and where an unfaithful one would be most misleading to a compliance reviewer.
+
+### Artifacts
+
+- `results/model/` — best checkpoint + tokenizer + `train_config.json` (255 MB, gitignored)
+- `results/figures/confusion_matrix.png`
+- `results/metrics.json` — `baseline` and `finetune` sections, full grid recorded
+
+---
+
+## Day 5 — Error analysis 🚧
+
+Next.

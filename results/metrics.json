@@ -11,12 +11,27 @@
       ],
       "sublinear_tf": true
     },
-    "fit_seconds": 12.5,
+    "fit_seconds": 10.8,
     "model": "tfidf+logreg",
     "n_features": 185763,
+    "n_test": 5400,
     "n_train": 25200,
     "n_val": 5400,
     "seed": 42,
+    "test": {
+      "accuracy": 0.84,
+      "macro_f1": 0.8411038685881583,
+      "per_class_f1": {
+        "checking_savings": 0.7949438202247191,
+        "credit_card": 0.808955223880597,
+        "credit_reporting": 0.768361581920904,
+        "debt_collection": 0.7958426132145509,
+        "money_transfer": 0.8227168073676132,
+        "mortgage": 0.9227306826706677,
+        "student_loan": 0.9367469879518072,
+        "vehicle_loan": 0.878533231474408
+      }
+    },
     "val": {
       "accuracy": 0.8437037037037037,
       "macro_f1": 0.8444713577611378,
@@ -30,6 +45,214 @@
         "student_loan": 0.9396681749622926,
         "vehicle_loan": 0.8575803981623277
       }
+    }
+  },
+  "finetune": {
+    "best_config": {
+      "batch_size": 16,
+      "epochs": 3,
+      "lr": 5e-05,
+      "max_len": 256
+    },
+    "best_index": 0,
+    "device": "mps",
+    "grid": [
+      {
+        "config": {
+          "batch_size": 16,
+          "epochs": 3,
+          "lr": 5e-05,
+          "max_len": 256
+        },
+        "val": {
+          "accuracy": 0.8525925925925926,
+          "epoch": 2,
+          "macro_f1": 0.8527403935915858,
+          "per_class_f1": {
+            "checking_savings": 0.786908077994429,
+            "credit_card": 0.8172043010752689,
+            "credit_reporting": 0.8141459744168548,
+            "debt_collection": 0.797037037037037,
+            "money_transfer": 0.8283132530120482,
+            "mortgage": 0.9401330376940134,
+            "student_loan": 0.9428152492668622,
+            "vehicle_loan": 0.8953662182361734
+          },
+          "train_seconds": 3350.5
+        }
+      },
+      {
+        "config": {
+          "batch_size": 16,
+          "epochs": 3,
+          "lr": 2e-05,
+          "max_len": 256
+        },
+        "val": {
+          "accuracy": 0.8496296296296296,
+          "epoch": 3,
+          "macro_f1": 0.8497459697514589,
+          "per_class_f1": {
+            "checking_savings": 0.7861356932153393,
+            "credit_card": 0.8195488721804511,
+            "credit_reporting": 0.8005822416302766,
+            "debt_collection": 0.7877885331347729,
+            "money_transfer": 0.83492296404989,
+            "mortgage": 0.9376375641966251,
+            "student_loan": 0.9484690067214339,
+            "vehicle_loan": 0.8828828828828829
+          },
+          "train_seconds": 3354.4
+        }
+      },
+      {
+        "config": {
+          "batch_size": 32,
+          "epochs": 3,
+          "lr": 5e-05,
+          "max_len": 128
+        },
+        "val": {
+          "accuracy": 0.8427777777777777,
+          "epoch": 3,
+          "macro_f1": 0.8430298325607452,
+          "per_class_f1": {
+            "checking_savings": 0.7663003663003664,
+            "credit_card": 0.8148698884758364,
+            "credit_reporting": 0.8125915080527086,
+            "debt_collection": 0.7856071964017991,
+            "money_transfer": 0.814327485380117,
+            "mortgage": 0.9332344213649851,
+            "student_loan": 0.9410887397464579,
+            "vehicle_loan": 0.8762190547636909
+          },
+          "train_seconds": 1559.0
+        }
+      }
+    ],
+    "model": "distilbert-base-uncased",
+    "seed": 42,
+    "test": {
+      "accuracy": 0.8496296296296296,
+      "confusion_matrix": [
+        [
+          521,
+          68,
+          7,
+          23,
+          2,
+          8,
+          28,
+          18
+        ],
+        [
+          60,
+          538,
+          9,
+          20,
+          3,
+          4,
+          22,
+          19
+        ],
+        [
+          5,
+          3,
+          574,
+          24,
+          61,
+          4,
+          3,
+          1
+        ],
+        [
+          29,
+          25,
+          54,
+          525,
+          25,
+          4,
+          4,
+          9
+        ],
+        [
+          1,
+          2,
+          106,
+          9,
+          549,
+          5,
+          3,
+          0
+        ],
+        [
+          6,
+          9,
+          5,
+          8,
+          2,
+          629,
+          7,
+          9
+        ],
+        [
+          21,
+          24,
+          6,
+          4,
+          1,
+          10,
+          606,
+          3
+        ],
+        [
+          11,
+          3,
+          4,
+          6,
+          1,
+          2,
+          2,
+          646
+        ]
+      ],
+      "confusion_matrix_labels": [
+        "credit_reporting",
+        "debt_collection",
+        "checking_savings",
+        "credit_card",
+        "money_transfer",
+        "mortgage",
+        "vehicle_loan",
+        "student_loan"
+      ],
+      "macro_f1": 0.8495105418955551,
+      "per_class_f1": {
+        "checking_savings": 0.7972222222222223,
+        "credit_card": 0.8114374034003091,
+        "credit_reporting": 0.7840481565086531,
+        "debt_collection": 0.7988121752041574,
+        "money_transfer": 0.8324488248673237,
+        "mortgage": 0.9381058911260254,
+        "student_loan": 0.936231884057971,
+        "vehicle_loan": 0.8977777777777778
+      }
+    },
+    "val": {
+      "accuracy": 0.8525925925925926,
+      "epoch": 2,
+      "macro_f1": 0.8527403935915858,
+      "per_class_f1": {
+        "checking_savings": 0.786908077994429,
+        "credit_card": 0.8172043010752689,
+        "credit_reporting": 0.8141459744168548,
+        "debt_collection": 0.797037037037037,
+        "money_transfer": 0.8283132530120482,
+        "mortgage": 0.9401330376940134,
+        "student_loan": 0.9428152492668622,
+        "vehicle_loan": 0.8953662182361734
+      },
+      "train_seconds": 3350.5
     }
   }
 }

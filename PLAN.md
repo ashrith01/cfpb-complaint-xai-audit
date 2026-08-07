@@ -44,12 +44,30 @@ while checking_savings (0.784), credit_reporting (0.791) and debt_collection
 (0.799) are the confusable core. Expect the fine-tune's gain — and the most
 interesting explanation-faithfulness behaviour — to concentrate there.
 
-## Day 3–4 — Fine-tune
-- [ ] `src/train.py`: DistilBERT sequence classification head
-- [ ] Try 2–4 configs (learning rate, epochs, max_len) — small grid, not a sweep
-- [ ] Select best by val macro-F1
-- [ ] Run on held-out test set once, report final metrics + confusion matrix
-- **DoD:** `results/metrics.json` has test accuracy, macro-F1, per-class F1, confusion matrix saved as figure
+## Day 3–4 — Fine-tune ✅
+- [x] `src/train.py`: DistilBERT sequence classification head
+- [x] Try 2–4 configs (learning rate, epochs, max_len) — small grid, not a sweep
+- [x] Select best by val macro-F1
+- [x] Run on held-out test set once, report final metrics + confusion matrix
+- **DoD:** ✅ `results/metrics.json` has test accuracy, macro-F1, per-class F1;
+  confusion matrix at `results/figures/confusion_matrix.png`
+
+**Test macro-F1 0.8495 vs baseline 0.8411 — a +0.0084 gain** (both on the held-out
+test set). Best config: lr 5e-5, max_len 256, batch 16, best at **epoch 2 of 3**
+(epoch 3 overfit: val macro-F1 fell to 0.8504 while train loss kept dropping).
+
+Two things worth carrying into the explainability work:
+
+1. **max_len 128 scored 0.8430 — below the baseline.** Sequence length dominates
+   learning rate here; a 128-token window truncates ~half a typical narrative.
+2. **The gain did not land where Day 2 predicted.** The confusable core
+   (checking_savings, debt_collection, credit_card) moved ≤+0.003. The gain came
+   from credit_reporting (+0.016) and vehicle_loan (+0.019). What's hard for
+   bag-of-words is mostly hard for the transformer too — suggesting genuine label
+   ambiguity, not a modelling shortfall.
+
+Dominant confusions: money_transfer → checking_savings (0.16), and
+credit_reporting ↔ debt_collection (0.10 / 0.09, near-symmetric).
 
 ## Day 5 — Error analysis
 - [ ] Which classes confuse with which? Pull 10 misclassified examples per top-confused pair

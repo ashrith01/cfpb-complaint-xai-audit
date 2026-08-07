@@ -60,7 +60,7 @@ BASELINE_CONFIG = {
 
 def run_baseline():
     """TF-IDF + LogisticRegression baseline. Write result to results/metrics.json under 'baseline'."""
-    train_df, val_df = load_split("train"), load_split("val")
+    train_df, val_df, test_df = load_split("train"), load_split("val"), load_split("test")
     _, id2label, short = load_label_map()
 
     cfg = BASELINE_CONFIG
@@ -75,17 +75,18 @@ def run_baseline():
 
     t0 = time.time()
     x_train = vec.fit_transform(train_df["narrative"])
-    x_val = vec.transform(val_df["narrative"])
     clf = LogisticRegression(C=cfg["C"], max_iter=cfg["max_iter"], random_state=SEED)
     clf.fit(x_train, train_df["label"])
     elapsed = time.time() - t0
 
-    pred = clf.predict(x_val)
-    y_val = val_df["label"]
-    accuracy = float(accuracy_score(y_val, pred))
-    macro_f1 = float(f1_score(y_val, pred, average="macro"))
-    per_class = f1_score(y_val, pred, average=None, labels=sorted(id2label))
-    per_class_f1 = {short[id2label[i]]: float(f) for i, f in enumerate(per_class)}
+    # Scored on val AND test. The fine-tune reports test, so a val-only baseline
+    # would leave the headline "beats baseline" claim comparing two different
+    # splits. Nothing is selected on test here -- the baseline config is fixed
+    # and untuned -- so scoring it there costs no validity.
+    val = _score(val_df["label"], clf.predict(vec.transform(val_df["narrative"])),
+                 id2label, short)
+    test = _score(test_df["label"], clf.predict(vec.transform(test_df["narrative"])),
+                  id2label, short)
 
     payload = {
         "model": "tfidf+logreg",
@@ -93,27 +94,26 @@ def run_baseline():
         "seed": SEED,
         "n_train": int(len(train_df)),
         "n_val": int(len(val_df)),
+        "n_test": int(len(test_df)),
         "n_features": int(x_train.shape[1]),
         "fit_seconds": round(elapsed, 1),
-        "val": {
-            "accuracy": accuracy,
-            "macro_f1": macro_f1,
-            "per_class_f1": per_class_f1,
-        },
+        "val": val,
+        "test": test,
     }
     update_metrics("baseline", payload)
 
     print(f"\nBaseline: TF-IDF({cfg['ngram_range'][0]}-{cfg['ngram_range'][1]}gram, "
           f"{x_train.shape[1]:,} features) + LogisticRegression")
     print(f"  fit on {len(train_df):,} train docs in {elapsed:.1f}s")
-    print(f"\n  val accuracy   {accuracy:.4f}")
-    print(f"  val macro-F1   {macro_f1:.4f}   <- floor for the fine-tune to beat")
-    print("\n  per-class F1 (val):")
-    for name, f in sorted(per_class_f1.items(), key=lambda kv: kv[1]):
+    print(f"\n  val  accuracy {val['accuracy']:.4f}   macro-F1 {val['macro_f1']:.4f}")
+    print(f"  test accuracy {test['accuracy']:.4f}   macro-F1 {test['macro_f1']:.4f}"
+          f"   <- floor for the fine-tune to beat")
+    print("\n  per-class F1 (test):")
+    for name, f in sorted(test["per_class_f1"].items(), key=lambda kv: kv[1]):
         print(f"    {name:<20} {f:.4f}")
-    print(f"\n  written to results/metrics.json under 'baseline'")
+    print("\n  written to results/metrics.json under 'baseline'")
 
-    return {"accuracy": accuracy, "macro_f1": macro_f1}
+    return {"val": val, "test": test}
 
 
 def _device() -> torch.device:
@@ -331,12 +331,13 @@ def main():
         "test": test_metrics,
     })
 
-    delta = test_metrics["macro_f1"] - baseline["macro_f1"]
+    # Like-for-like: both numbers are on the held-out test set.
+    delta = test_metrics["macro_f1"] - baseline["test"]["macro_f1"]
     print(f"\n{'=' * 70}")
-    print(f"  test accuracy   {test_metrics['accuracy']:.4f}")
-    print(f"  test macro-F1   {test_metrics['macro_f1']:.4f}")
-    print(f"  baseline (val)  {baseline['macro_f1']:.4f}")
-    print(f"  delta           {delta:+.4f}"
+    print(f"  test accuracy         {test_metrics['accuracy']:.4f}")
+    print(f"  test macro-F1         {test_metrics['macro_f1']:.4f}")
+    print(f"  baseline test macro-F1 {baseline['test']['macro_f1']:.4f}")
+    print(f"  delta                 {delta:+.4f}"
           f"   {'BEATS baseline' if delta > 0 else 'DOES NOT beat baseline'}")
     print("\n  per-class F1 (test):")
     for name, f in sorted(test_metrics["per_class_f1"].items(), key=lambda kv: kv[1]):
