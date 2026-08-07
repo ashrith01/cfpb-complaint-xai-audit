@@ -11,7 +11,7 @@
       ],
       "sublinear_tf": true
     },
-    "fit_seconds": 11.6,
+    "fit_seconds": 12.5,
     "model": "tfidf+logreg",
     "n_features": 185763,
     "n_train": 25200,
