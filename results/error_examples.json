@@ -1,0 +1,274 @@
+[
+  {
+    "true": "money_transfer",
+    "pred": "checking_savings",
+    "count": 106,
+    "rate": 0.157,
+    "examples": [
+      {
+        "complaint_id": 10240603,
+        "confidence": 0.9729,
+        "narrative": "My direct deposit has not been deposited into my account. I usually get it a day early but this was not the case. I usually get my deposit Tuesdays around . I looked on twitter for any updates to see if anyone else was having the same issue and it turns out Im not the only one. Capital one stated they would have direct deposit in our accounts by 1. I called capital one myself at and asked for a time frame to which she said by the afternoon but had no exact time to give me. I then asked what would be the next step to take if it wasnt deposited by today. She said Id have to file a claim. There should be no reason not one single capital one client was not notified about this issue. It is the en",
+        "truncated": true
+      },
+      {
+        "complaint_id": 20336729,
+        "confidence": 0.9677,
+        "narrative": "Wells Fargo refuses to give me my records they are practicing unfair business as well not following the laws set in place for victims of identity theft such as myself. I have written them several times and they have not responded. I spoke to several customer services reps nd taped the conversations. One rep told me that yes they have digital data for me and when I asked for the address she told me there was no addresses that I could mail my request to, next I spoke to another rep about retrieving my on line banking and mobile app records and he straight out said that because I am no longer a Wells Fargo customer that Im not entitled to them. That is illegal. Yesterday I went into a branch an",
+        "truncated": true
+      },
+      {
+        "complaint_id": 16739959,
+        "confidence": 0.9575,
+        "narrative": "Wells Fargo allowed a company to withdraw from my checking acct through my debit card which is a visa. They told me it was through my digital wallet. When I contacted they went through my phone remotely and said there is no evidence of me making the charges. Wells Fargo has repeatedly violated my efta rights and refuses to refund my money. Since the dispute, it has happened yet again to a total of almost . Meanwhile I am losing everything I own from this lack of access to my money. Please help me get my money back and a fair investigation performed. There is no proof I made these charges because I did not. I offered to take a polygraph at Wells Fargos expense as well.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 19535694,
+        "confidence": 0.9555,
+        "narrative": "I opened a checking account on / /year>. I waited about a week for my debit card to come in because I was gon na use as my primary checking account. Now when I finally received my card, I tried to activate it, but it said I could not due to the fact that it said wrong or expiration date, although everything matched up on and and matched up on my end, as far as the card on my app and my physical card, I got through the mail. I got on the phone and stayed on the phone with support for three days for at least an hour and got nowhere. They kept telling me to go to the health center on the app which I did and that only brought me to a robot. That did nothing. And then the robot told me to call th",
+        "truncated": true
+      },
+      {
+        "complaint_id": 11717318,
+        "confidence": 0.9549,
+        "narrative": "I am filing this complaint against Pentagon Federal Credit Union ( PenFed ) regarding their decision to block my access to without proper disclosure or justification. While PenFed did issue an adverse action notice related to my inability to qualify for a free checking account, they failed to explain why this should impact my ability to use , particularly since I had already been using the service through my savings account without any issue. Details of the Incident . I had previously been using through my PenFed savings account without any restrictions, and no credit check was required at the time of enrollment. . Recently, I opened a restricted checking account due to determination that I ",
+        "truncated": true
+      },
+      {
+        "complaint_id": 11636455,
+        "confidence": 0.9541,
+        "narrative": "I had a chase account and it was overdrafted about $590.00 . I was going to fix this once I got paid from my job. My son wanted to open a bank account and my college account was not eligibile to create an account. So I opened a total checking account and was able to open my sons account as well. It was a coworkers birthday and I did not have the physical card but I did have it on . My coworkers sent me $5.00 each. My dad tried to send me $200.00 and was rejected. I called chase and they said try again - at this point my dad had sent the money to my coworker to send to me. It did not work again. My account was than blocked. I called chase they told me in order to get access to I would have to",
+        "truncated": true
+      },
+      {
+        "complaint_id": 14889121,
+        "confidence": 0.9437,
+        "narrative": "/ /year>2025 got an alert my paycheck benefits were active ive called for months about getting my overdraft active again they constantly tell me i dont qualify even after ive sent proof in multiple times that i qualify for overdraft through my paycheck benefits they refuse to give me access to overdraft and and it states on there paycheck benefits that overdraft is included in paycheck benefits they constantly say i had an outstanding balance but they cant ever tell me how much it was after multiple times of asking how much it was last year i had overdraft payed off what was due they constantly tell me they dont have control over the overdraft system i called again yesterday about got told i",
+        "truncated": true
+      },
+      {
+        "complaint_id": 15496477,
+        "confidence": 0.9419,
+        "narrative": "This filing supplements and cross-references my prior CFPB complaint ( Case # [ ] ). Relay Financial has provided contradictory statements regarding my account closure and funds : . In their official CFPB response on , represented that my balance would be returned by mailed check within up to 60 days ( see Exhibit A ). . In a direct email dated from , at Relay, the company claimed that my deposit was returned on and that no funds remain ( see Exhibit B ). Both statements can not be true. This constitutes material misrepresentation in a federal consumer protection proceeding, a violation of 12 U.S.C. 5536 ( a ) ( 1 ) ( B ) ( UDAAP ). Penalties under 12 U.S.C. 5565 ( c ) may reach $>= $1,000,0",
+        "truncated": true
+      },
+      {
+        "complaint_id": 8647460,
+        "confidence": 0.9336,
+        "narrative": "I have been an account holder of Chine for over 4 years and my payroll and retirement checks are direct deposited into my checking account monthly however, Chime refuse my mobile deposit of $15000.00 on / /year>, which is under the $20000.00 maximum limit.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 12409284,
+        "confidence": 0.931,
+        "narrative": "I made a chime account because I needed a bank for my unemployment benefits so I thought I could trust chime it being a bank and there were just non stop unauthorized transactions and they always allowed me to file a dispute but never resolved any unauthorized transactions that occurred I have documentation and evidence from the merchants through via email explaining what has occurred and that the transactions were unauthorized. I was not able to summit them due to them closing my account to stop any resolution in my case. Which is honestly illegal I provided evidence police report numbers etc and still nothing was resolved they dont help there customer they allow people to hack into peoples",
+        "truncated": true
+      }
+    ]
+  },
+  {
+    "true": "credit_reporting",
+    "pred": "debt_collection",
+    "count": 68,
+    "rate": 0.1007,
+    "examples": [
+      {
+        "complaint_id": 12886586,
+        "confidence": 0.9763,
+        "narrative": "I am filing this complaint because a debt has been reported to the credit bureaus and is now being collected by Healthcare Finance Direct ( HFD ) or a third-party collection agency, despite the fact that I never received the service I was charged for. I signed up for aligners through , but they failed to deliver the promised services. I attempted to get help from their customer service and account management team multiple times. Eventually, I received written confirmation via email from a account manager stating that my account would be canceled and refunded. Despite this, the lender ( HFD ) has continued to report the account as delinquent and has even sent it to collections. I believe this",
+        "truncated": true
+      },
+      {
+        "complaint_id": 12540592,
+        "confidence": 0.9744,
+        "narrative": "I am writing to file a formal complaint against midland credit. And portfolio recovery regarding improper debt collection practices. The actions taken by this company have violated my rights under the Fair Debt Collection Practices Act ( FDCPA ) and/or the Fair Credit Reporting Act ( FCRA ). Multiple times a day I receive a letter/phone call from midland credit and portfolio recovery attempting to collect a debt that I do not recognize. I requested debt validation on / /year>, but they have not responded within the required 30 days. Despite this, they continue to report this account to the credit bureaus, which is negatively impacting my credit.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 10480252,
+        "confidence": 0.9701,
+        "narrative": "Got an alert that someone added a debt to my name that I have no clue who this company is or what it is associated with. I pay my bills and never late on anything.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 8522174,
+        "confidence": 0.97,
+        "narrative": "I rented from an apartment complex in of , called at . I was told that I would be given a ten day notice because someone said that I had someone living in my apartment that wasnt on the lease. In of , I was given that noticed and I asked the Assistant property manager what I needed to pay as far as the remaining rent goes. She said, I dont know and I wouldnt pay if I were you. I left the apartment in the middle of . In I received a bill from IQ Data International that represents at . The bill that they provided me with was incorrect because the rest should have been prorated because I left in the middle of the month and they also put on my account which I paid for separately. When I called t",
+        "truncated": true
+      },
+      {
+        "complaint_id": 10063890,
+        "confidence": 0.9676,
+        "narrative": ", After carefully investigating the company , they are not even licensed to collect in the state that I live in Georgia. As such, any attempt to collect the alleged debt from me violates Georgia state law and the Fair Debt Collection Practices Act ( FDCPA ). Consequences of Non-Compliance : Please be aware that any further attempts to collect this debt in violation of Iowa law or the FDCPA will be met with legal action. I am prepared to file a complaint with the Georgia Attorney General 's Office, the Federal Trade Commission ( FTC ), and the Consumer Financial Protection Bureau ( CFPB ). I will also seek damages as allowed under state and federal law. Delete I demand that you immediately ce",
+        "truncated": true
+      },
+      {
+        "complaint_id": 9637499,
+        "confidence": 0.9668,
+        "narrative": "I recently pulled my credit report and noticed an account I wasn't familiar with. I sent this company a debt validation letter on for the company to validate that this debt belongs to me. Under 15 u.s. code s 1692g validation of debt. This company failed to validate the debt with the required documentation and didn't respond at all. After 38 days of the letter being sent out this company started calling me to collect on the debt for the first time since the debt reported on my credit bureau. After i asked this company to cease and desist any communication per debt validation letter until the debt is verified. this company called on / / after i asked to stop all communication via phone and re",
+        "truncated": true
+      },
+      {
+        "complaint_id": 11926163,
+        "confidence": 0.9657,
+        "narrative": "Sunday time submitted email regarding a debt from original company This debt has other collection agencies and original company. agencies are not collecting on the same debt and multi reporting in the same debt affecting my credit score further more. My personal information was exposed and leaked under companies . companies reporting and collecting on this debt. In Violation of FCRA. . multiple collection agencies are collecting on the same debt, it could be a violation of the Fair Debt Collection Practices Act ( FDCPA ). The FDCPA is a federal law that prohibits debt collectors from using unfair, deceptive, or abusive practices",
+        "truncated": false
+      },
+      {
+        "complaint_id": 13463202,
+        "confidence": 0.9648,
+        "narrative": "I sent a cease and desist letter via certified mail along with a request to provide debt validation from Columbia debt recovery Llc and proof that they are legally able to operate as a business in the state of Colorado.They sent back a document that lacked any type of signature, verification or agreement between the involved parties. Their possession of any type of my personal information without my given permission constitutes a clear violation of my right to privacy according to 15 USC 1681.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 8252510,
+        "confidence": 0.9635,
+        "narrative": "I never opened this account. I previously disputed this account stating : \" I never had a contract with this debt collector for any debt. Please provide proof from the original creditor that this debt collector owns this debt and has the legal authority to collect it or delete this account. \". I don't agree with the results of your investigation. Please mail me the proof of your investigation and proof that this debt collector has a legal right to collect, or delete this account. No Response from company $130.00 NEGATIVE Suggested Account # Status Open Original Creditor Creditor Type Other Collection Agencies High Balance $130.00 Open Date Last Reported Remarks Account information disputed b",
+        "truncated": true
+      },
+      {
+        "complaint_id": 12769466,
+        "confidence": 0.959,
+        "narrative": "CREDENCE RESOURCE MANAGEMENT is reporting an account that does not belong to me. They claim the original creditor was , but confirmed that I have only had one account with them, with a balance of $510.00 , and that the rightful owner of the alleged debt is which is already listed on my credit report. This means CREDENCE RESOURCE has no valid basis for reporting this account. Additionally, I never received any written notice from IXXXX , violating 15 U.S.C. 1692g ( a ), which requires debt collectors to send a written validation notice within five days of initial communication, informing consumers of their right to dispute the debt. Since this account is unverified and improperly reported, I ",
+        "truncated": true
+      }
+    ]
+  },
+  {
+    "true": "checking_savings",
+    "pred": "money_transfer",
+    "count": 61,
+    "rate": 0.0904,
+    "examples": [
+      {
+        "complaint_id": 11555787,
+        "confidence": 0.9895,
+        "narrative": "Zelles limited identity verification methods have allowed bad actors to quickly create accounts and target Zelle users. For example, criminals often exploited Zelles design and features to link a victims token to the fraudsters deposit account, which caused payments intended for the consumers account to instead flow to the fraudster account.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 19070101,
+        "confidence": 0.9589,
+        "narrative": "On , I used my Venmo debit card to pay $310.00 to a merchant listed as \" Simple E Tax Filin ''. This merchant engaged in DECEITFUL and PREDATORY PHISHING practices, misrepresenting themselves as an official tax service to obtain my financial information and funds. Charging me for a service that the IRS offers for free. My Attempt to Resolve : I have repeatedly attempted to resolve this with the merchant, Simple E Tax Filing and with Venmo Support ( Case # ). Despite providing evidence of the merchant 's deceit, Venmo has denied my dispute, claiming the service was \" provided as agreed ''. On , I was denied, and reopened my case on , I spoke with a floor supervisor who refused to escalate the",
+        "truncated": true
+      },
+      {
+        "complaint_id": 17360118,
+        "confidence": 0.9481,
+        "narrative": "I received a call late on / /year> from someone pretending to be Coinbase. Stating I had a foreign IP hit. That I needed verify myself again and then click on transactions that I did not authorize. Apparently that was false. The scammer sent himself $1000.00 in cash. Coinbase has not been helpful or empathetic at all. The case is with their fraud group. I also have a credit card with a balance and would like to pay that. They told me that I can not pay the credit card until I pay the $1000.00 , even though they have not finished their investigation. They told me if I dont pay the $1000.00 in order to then pay my credit card, they will report me as behind on my credit. I tried providing them ",
+        "truncated": true
+      },
+      {
+        "complaint_id": 15050309,
+        "confidence": 0.9278,
+        "narrative": "On my savings and checking accounts were taken over. ( via a cell phone spoof ) to : $15.00 to : $35.00 to : $50.00 Money Transfer to $40.00 Money Transfer to $25.00 Online Transfer from Savings to Checking : $3000.00 Money Transfer to : $350.00 Money Transfer to $520.00 Money Transfer to : $40.00 Money Transfer to $25.00 Money Transfer to : Money Transfer to $23.00 Money Transfer to $200.00 Money Transfer to $430.00 Money Transfer to : $50.00 Money Transfer to : $550.00 Money Transfer to : $540.00 Money Transfer to : $60.00 Money Transfer to $130.00 Money Transfer to $1300.00 Money Transfer to : $800.00 Money Transfer to $200.00 Money Transfer to $280.00 Online Transfer from Savings to Chec",
+        "truncated": true
+      },
+      {
+        "complaint_id": 21639918,
+        "confidence": 0.9272,
+        "narrative": ": transaction made to in the amount of $400.00 . : transaction made to in the amount of $600.00 . What happened here was an annoying kind of scam : Business offers a specific service, is paid for that service, and fails to deliver such a service. Red flags only hit right after the second transfer, after which I contacted demanding a full on refund. After \" promising '' to get back to me the next day, did not return any calls and ghosted the line. Someone else ( unknown name/source ) from within the same department area knew what was going on, and gave me the warning and instruction to file chargeback with my back, assuring me this was a scam. Phone records can later be pulled to provide this",
+        "truncated": true
+      },
+      {
+        "complaint_id": 21226517,
+        "confidence": 0.924,
+        "narrative": "Since the very first day I opened my personal and business account in , they frozen it multiple times. I also received a payment in my new business account, that I understand it's new they will hold the money for 21 days and I patiently waited the time they said. Yesterday, I tried to link the business bank account as well the debit card and it did let me to link it, then I tried to move the money from business account to personal account ( both venmo ) and it doesn't let me, I called multiple times to customer service, one call lasted 1hour 28minutes and they only said they will escalate my case and that's it. That is an automated system that flagged when I tried to move the money and keeps",
+        "truncated": true
+      },
+      {
+        "complaint_id": 16157835,
+        "confidence": 0.924,
+        "narrative": "In / /year>, during the purchase of a home, the users agents email system was compromised, and scammers provided fraudulent wiring instructions. Following these instructions, the user transferred $10000.00 via ACH through Bank of America. Within 24 hours, the user discovered the fraud, notified the bank, and was told the transfer would fail due to mismatched account information and the funds would be returned within 35 business days. However, the money was never returned. Despite repeated follow-ups, Bank of America can not confirm whether the funds were ever successfully sent or received by The tracking number Bank of America provided to was invalid, and confirmed it never received correct ",
+        "truncated": true
+      },
+      {
+        "complaint_id": 18867255,
+        "confidence": 0.9238,
+        "narrative": "On we attempted to send $170.00 to our son in the Greenlight app. In order to do so, we had to add $150.00 to our Greenlight Parent Wallet ( $25.00 current balance + $150.00 transfer from funding bank ). When doing the transfer, we received a message in the app saying there was an error. The $150.00 transfer did not show in our parent wallet and the $25.00 that had been in the wallet was gone from the account. No money had transferred to our son 's account either. Since our parent wallet was now empty, we initiated another transfer to add $170.00 to our parent wallet which did go through. Greenlight withdrew two $170.00 transactions from our primary/funding bank, On I contacted Greenlight vi",
+        "truncated": true
+      },
+      {
+        "complaint_id": 20002793,
+        "confidence": 0.8945,
+        "narrative": "This person is now using another PayPal account which confirms and tells me you guys never did anything to the account I reported. Like are you serious? First you guys let a scammer walk away with $100.00 and now I find out nothing was done to the account?! I need something to be done. Otherwise, I'm taking this to the media. The scammer is using emails , , with number . I've reported this account for fraud and nothing has been done.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 8180098,
+        "confidence": 0.8861,
+        "narrative": "USD $1000.00 per violation for each transaction It has come to my understanding that your company did not give me my full disclosure of my transaction history since the year . It only has years accounted for. Due to the violation under the Privacy Act. Each transaction was not approved by my Authorization. Starting from - . A full disclosure was not obtained when requested, only partial as well. 16 CFR PART 313 - 16 CFR Part 313 - PART 313PRIVACY OF CONSUMER FINANCIAL INFORMATION 5 U.S. Code 6802 - Obligations with respect to disclosures of personal information a ) Notice requirements Except as otherwise provided in this subchapter, a financial institution may not, directly or through any af",
+        "truncated": true
+      }
+    ]
+  },
+  {
+    "true": "debt_collection",
+    "pred": "credit_reporting",
+    "count": 60,
+    "rate": 0.0889,
+    "examples": [
+      {
+        "complaint_id": 9832154,
+        "confidence": 0.9605,
+        "narrative": "This CFPB complaint has been filed to request pursuant to FCRA 605B ( 15 U.S.C. 1681c-2 ) that , , and Experian block information appearing on my consumer credit report that is the result of identity theft and fraud within 4 business days of receiving this complaint. This fraudulent, inaccurate, and false information consists of accounts and hard inquiries that were opened and made without my authorization. Specifically : , account ending in and , opened on . , account ending in and , opened on . , account ending in and , opened on . , account ending in and , opened on . , account ending in and , opened on . , account ending in and , opened on . , account ending in and , opened on . , accoun",
+        "truncated": true
+      },
+      {
+        "complaint_id": 8677582,
+        "confidence": 0.9588,
+        "narrative": "On / /year> I filed a dispute with Experian about report # for $58000.00 By the Child Support Enforcement. At the time of mentioned dispute I informed the two agencies that according to the Fair Credit Reporting Act ( FCRA ) Section 605B, it is illegal to report information on my credit report without my permission. Furthermore i informed the agencies that Child Support was declared unconstitutional in a Minnesota Supreme Court ruling for violating the seperation of power riquired by the Minnesota Constitution in Article 3 Section 1, and Child Support Agencies actions are also unconstitutional due to lack of Probable Cause. I then instructed Experian to please removed the items from my credi",
+        "truncated": true
+      },
+      {
+        "complaint_id": 14230602,
+        "confidence": 0.9532,
+        "narrative": "Subject : Formal Dispute and Request for Immediate Removal of Inaccurate Information Under FCRA Section 605 Dear TransUnion Dispute Department, I am writing to formally dispute multiple entries on my TransUnion credit report that are inaccurate, do not belong to me, or are otherwise unverifiable, as outlined under the Fair Credit Reporting Act ( FCRA ), Sections 605 ( a ), 605 ( b ), and 611. These items are causing unjust harm to my credit profile and must be investigated and removed immediately. Disputed Items Accounts That Do Not Belong to Me : . . . . . . . Paid and closed account. Not mine. Paid and closed account. Not mine. Paid and closed account. Not mine. Unpaid charge-off, sold to ",
+        "truncated": true
+      },
+      {
+        "complaint_id": 17195436,
+        "confidence": 0.9499,
+        "narrative": "Dear , TransUnion, , and , This email serves as a final demand and notice of intent to sue under the Fair Credit Reporting Act ( 15 U.S.C. 1681 et seq. ) and the Fair Debt Collection Practices Act ( 15 U.S.C. 1692 et seq. ) for inaccurate, incomplete, and inconsistent credit reporting concerning the alleged account ( ) furnished by . Reporting Inconsistencies Furnisher : Date Opened : / /year> Status : Past Due as of / /year> Status Updated : / /year> Balance Updated : / /year> Alleged Balance : $220.00 ( current and original ) No record found. This omission constitutes incomplete reporting and a failure to maintain accuracy and parity among nationwide credit reporting agencies, violating 15",
+        "truncated": true
+      },
+      {
+        "complaint_id": 12103234,
+        "confidence": 0.9495,
+        "narrative": "I am writing to formally dispute certain information on my credit report that I believe is inaccurate and potentially violates the Fair Credit Reporting Act ( FCRA ). I recently reviewed my credit report and found the following inaccuracies : - [ List specific accounts, including account numbers and any other pertinent information, along with details about why they are inaccurate. ] According to the FCRA, you are required to maintain accurate and complete information in consumer reports ( 15 U.S.C. 1681e ( b ) ). Additionally, I have the right to dispute any inaccurate information on my credit report, and you must investigate the disputed items ( 15 U.S.C. 1681i ). Based on the recent lawsui",
+        "truncated": true
+      },
+      {
+        "complaint_id": 16002436,
+        "confidence": 0.9452,
+        "narrative": "After reviewing my credit report ( ) from Equifax. I noticed a lot of incomplete and inaccurate data. I have submitted a dispute to Equifax regarding this matter. I am notifying you as well that of the accounts in dispute belongs to your company. Please see the attached letter to see in detail the information I am questioning and deeming as incomplete and inaccurate.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 15526262,
+        "confidence": 0.9449,
+        "narrative": "my information was released in 's data breach and my social security card was in my wallet that was stolen back in there's over 60 inquires on my credit report that needs to be removed and over 10 accounts I've reported multiple times with no accurate information given on why it can't be removed or proving it was properly opened",
+        "truncated": false
+      },
+      {
+        "complaint_id": 12272262,
+        "confidence": 0.9383,
+        "narrative": "I am filing a formal complaint against Equifax for its failure to comply with the Fair Credit Reporting Act ( FCRA ) by not removing inaccurate information from my credit report within the legally mandated timeframe. On [ date ], I disputed an incorrect account from that was reported on my Equifax credit file. Under 15 U.S.C. 1681i ( a ) ( 1 ) ( A ), Equifax is required to conduct a reasonable reinvestigation and correct or delete any inaccurate or unverifiable information within 30 days of receiving my dispute. However, despite the expiration of this period, the inaccurate information remains on my report, causing undue harm to my creditworthiness and financial standing. Equifax 's failure ",
+        "truncated": true
+      },
+      {
+        "complaint_id": 11706902,
+        "confidence": 0.9342,
+        "narrative": "I am filing this complaint regarding the inaccurate items on my credit report that continue to negatively impact my credit. Despite my efforts to resolve these directly, they remain unresolved, I request immediate investigation and removal of all negative items, as they are incorrect and do not reflect my true credit history.",
+        "truncated": false
+      },
+      {
+        "complaint_id": 9657951,
+        "confidence": 0.9329,
+        "narrative": "As per the guidance from the Consumer Financial Protection Bureau ( CFPB ) the documents needed are a picture ID, a bill, and a letter from an advocacy group helping me due to debt bondage, which falls under trafficking according to Trafficking-Debt Final Rule 1002.142 ( b ) ( 4 ) -5 -- 1002.142 ( b ) ( 7 ). I kindly request that you block this information from my credit report within four business days, pursuant to section 605C of the Fair Credit Reporting Act. I have given you my identification as well as the informatin requested from the list of acceptable itms which only 2 are required per the Law. I have provided all needed documentation as well as a victim determination letter accordin",
+        "truncated": true
+      }
+    ]
+  }
+]

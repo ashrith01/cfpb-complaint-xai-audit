@@ -47,6 +47,70 @@
       }
     }
   },
+  "error_analysis": {
+    "error_rate": 0.1504,
+    "lexical_shortcut": {
+      "Checking or savings account": {
+        "bank_terms_only": {
+          "accuracy": 0.9654,
+          "n": 289
+        },
+        "service_term_absent": {
+          "accuracy": 0.8782,
+          "n": 632
+        },
+        "service_term_present": {
+          "accuracy": 0.4419,
+          "n": 43
+        }
+      },
+      "Money transfer, virtual currency, or money service": {
+        "bank_terms_only": {
+          "accuracy": 0.1176,
+          "n": 34
+        },
+        "service_term_absent": {
+          "accuracy": 0.533,
+          "n": 227
+        },
+        "service_term_present": {
+          "accuracy": 0.9554,
+          "n": 448
+        }
+      }
+    },
+    "mean_confidence_correct": 0.9221,
+    "mean_confidence_incorrect": 0.7162,
+    "n_confidently_wrong_p90": 212,
+    "n_misclassified": 812,
+    "n_test": 5400,
+    "top_confused_pairs": [
+      {
+        "count": 106,
+        "pred": "checking_savings",
+        "rate": 0.157,
+        "true": "money_transfer"
+      },
+      {
+        "count": 68,
+        "pred": "debt_collection",
+        "rate": 0.1007,
+        "true": "credit_reporting"
+      },
+      {
+        "count": 61,
+        "pred": "money_transfer",
+        "rate": 0.0904,
+        "true": "checking_savings"
+      },
+      {
+        "count": 60,
+        "pred": "credit_reporting",
+        "rate": 0.0889,
+        "true": "debt_collection"
+      }
+    ]
+  },
   "finetune": {
     "best_config": {
       "batch_size": 16,

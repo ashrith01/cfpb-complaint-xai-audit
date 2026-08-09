@@ -1,4 +1,4 @@
-.PHONY: setup lock data train explain audit all clean
+.PHONY: setup lock data train evaluate explain audit all clean
 
 PY := .venv/bin/python
 
@@ -17,6 +17,9 @@ data:
 train:
 	$(PY) -m src.train
 
+evaluate:
+	$(PY) -m src.evaluate
+
 explain:
 	$(PY) -m src.explain.integrated_gradients
 	$(PY) -m src.explain.shap_explainer
@@ -26,7 +29,7 @@ audit:
 	$(PY) -m src.faithfulness
 	$(PY) -m src.audit
 
-all: data train explain audit
+all: data train evaluate explain audit
 
 clean:
 	rm -rf data/processed/* results/explanations/* results/figures/*

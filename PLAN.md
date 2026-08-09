@@ -69,10 +69,31 @@ Two things worth carrying into the explainability work:
 Dominant confusions: money_transfer → checking_savings (0.16), and
 credit_reporting ↔ debt_collection (0.10 / 0.09, near-symmetric).
 
-## Day 5 — Error analysis
-- [ ] Which classes confuse with which? Pull 10 misclassified examples per top-confused pair
-- [ ] Write a short failure taxonomy (ambiguous narrative, mislabeled ground truth, genuinely hard case)
-- **DoD:** `results/figures/confusion_matrix.png` + a short markdown note in `notebooks/`
+## Day 5 — Error analysis ✅
+- [x] Which classes confuse with which? Pull 10 misclassified examples per top-confused pair
+- [x] Write a short failure taxonomy (ambiguous narrative, mislabeled ground truth, genuinely hard case)
+- **DoD:** ✅ `results/figures/confusion_matrix.png` + [`notebooks/error_analysis.md`](notebooks/error_analysis.md)
+
+**812/5,400 wrong (15.0%); 212 of those at p>0.9.** Four largest confusions are two
+symmetric pairs (money_transfer↔checking_savings, credit_reporting↔debt_collection).
+
+🔑 **Headline finding candidate — the model learned a lexical shortcut.** On
+money_transfer, accuracy is 0.955 when the narrative names a money service
+(zelle/venmo/paypal/…), 0.533 when it doesn't, and **0.118 on the 34 cases using
+only bank vocabulary — below the 0.125 random-guess floor.** Established
+behaviourally, with no attribution method involved.
+
+This gives Days 6–10 a falsifiable test instead of a plausibility judgement: a
+faithful method should put its mass on the brand token in exactly these cases.
+
+Taxonomy: mislabeled ground truth ~40% (the CFPB product field is consumer-chosen,
+not derived from text), dual-nature events ~30%, evidence absent from input ~20%
+(redacted brand, or institution-type labels), no signal ~10%.
+
+⚠️ Two constraints this puts on later days:
+- Model error ≠ explanation error — don't score label noise as unfaithfulness
+- The Day 6–8 example set must be **stratified** (confidently-wrong + both
+  directions of each symmetric pair), not random
 
 ## Day 6–7 — Attribution methods (IG + SHAP)
 - [ ] `src/explain/integrated_gradients.py` via Captum

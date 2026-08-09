@@ -9,14 +9,14 @@ the code afterwards.
 - **Day-by-day checklist:** [`PLAN.md`](./PLAN.md)
 - **Final polished report:** [`README.md`](./README.md) (written Day 12)
 
-**Status:** Days 1–4 complete. Day 5 (error analysis) next.
+**Status:** Days 1–5 complete. Days 6–7 (IG + SHAP) next.
 
 | Day | Work | Status | Key number |
 |---|---|---|---|
 | 1 | Data prep | ✅ | 36,000 narratives, 8 classes × 4,500 |
 | 2 | TF-IDF + LogReg baseline | ✅ | test macro-F1 **0.8411** |
 | 3–4 | Fine-tune DistilBERT | ✅ | test macro-F1 **0.8495** (+0.0084) |
-| 5 | Error analysis | ⬜ | |
+| 5 | Error analysis | ✅ | 15.0% error rate; **lexical shortcut found** |
 | 6–7 | Integrated Gradients + SHAP | ⬜ | |
 | 8 | Attention rollout | ⬜ | |
 | 9 | Faithfulness scoring | ⬜ | |
@@ -285,6 +285,97 @@ and where an unfaithful one would be most misleading to a compliance reviewer.
 
 ---
 
-## Day 5 — Error analysis 🚧
+## Day 5 — Error analysis ✅
+
+Implemented `src/evaluate.py` (`make evaluate`) — the module the BRD architecture
+listed but the scaffolding never created. It caches per-example test predictions
+with **full class probabilities** to `results/predictions_test.parquet`, because
+Day 9 faithfulness scoring needs the probability of the originally-predicted class
+after tokens are removed, not just the argmax. Computing it once here avoids
+re-running the model inside each of the three explainers.
+
+Full write-up: [`notebooks/error_analysis.md`](./notebooks/error_analysis.md).
+
+**812 of 5,400 misclassified (15.0%).** Mean confidence 0.9221 when correct vs
+0.7162 when wrong — but **212 errors (26.1%) still land above p>0.9**. That
+confidently-wrong population is the Day 9–10 target.
+
+### The four largest confusions are two symmetric pairs
+
+| true | predicted | count | % of true class |
+|---|---|---|---|
+| money_transfer | checking_savings | 106 | 15.7% |
+| credit_reporting | debt_collection | 68 | 10.1% |
+| checking_savings | money_transfer | 61 | 9.0% |
+| debt_collection | credit_reporting | 60 | 8.9% |
+
+Symmetry is diagnostic. A one-way bias would mean the model favours a class;
+confusion flowing equally both ways means the boundary itself is ill-defined.
+
+### Headline: the model has learned a lexical shortcut
+
+Accuracy on the money_transfer / checking_savings pair, split by whether the
+narrative names a money service explicitly (`zelle|venmo|paypal|cash app|
+coinbase|western union|moneygram|remitly|wire transfer|crypto|bitcoin`):
+
+| true class | cue | n | accuracy |
+|---|---|---|---|
+| money_transfer | term present | 448 | **0.955** |
+| money_transfer | term absent | 227 | **0.533** |
+| money_transfer | bank terms only | 34 | **0.118** |
+| checking_savings | term absent | 632 | **0.878** |
+| checking_savings | term present | 43 | **0.442** |
+
+**The model appears to be detecting brand names rather than reasoning about the
+complaint.** With a service named it is 95.5% accurate; without, 53.3%; and on
+the 34 money-transfer complaints using *only* bank vocabulary it collapses to
+**11.8% — below the 12.5% random-guess floor for 8 balanced classes.**
+
+This is established *behaviourally*, with no attribution method involved, which
+makes it the most valuable thing found so far. It converts Days 6–10 from "do
+these highlights look sensible?" into a falsifiable test:
+
+> A faithful attribution method should place its mass on the brand token in
+> precisely these cases. One that instead highlights surrounding complaint
+> language is describing reasoning the model is not doing.
+
+Explainability work rarely has any ground truth to check against. This is a
+partial one, obtained for free.
+
+### Failure taxonomy (hand review of all 40 sampled errors)
+
+1. **Mislabeled ground truth (~40%)** — the CFPB product field is chosen by the
+   *consumer* at filing time, not derived from the text. Repeatedly the model's
+   prediction fits the narrative better than the gold label: a complaint labelled
+   `checking_savings` that is entirely about Zelle's design (p=0.990), a Coinbase
+   account takeover labelled `checking_savings`, an FCRA §605 dispute letter to
+   TransUnion labelled `debt_collection`.
+2. **Genuinely dual-nature events (~30%)** — a collections account on a credit
+   report is one event with two valid labels; several narratives cite FDCPA and
+   FCRA in the same paragraph. This is an irreducible ceiling, and the most likely
+   reason Day 3–4's fine-tune gained ≤0.003 F1 on exactly these classes.
+3. **Discriminating evidence absent from the input (~20%)** — either redaction
+   removed the deciding brand token, or the label depends on the institution's
+   registration (Chime and Relay Financial are money-services businesses, so
+   ordinary checking-account complaints about them are filed as money_transfer).
+   Neither fact is in the text.
+4. **No product signal at all (~10%)** — generic statute citations and demand
+   letters. One error is an FCRA template with placeholders left unfilled.
+
+### Consequences for the audit
+
+**Model error ≠ explanation error.** Categories 1 and 3 mean a large share of
+"wrong" predictions are wrong for reasons no explanation could repair.
+Faithfulness asks whether an explanation reflects *the model's* decision process —
+well-posed even when the decision is wrong. Conflating the two would score label
+noise as unfaithfulness.
+
+**The Day 6–8 example set must be stratified, not random** — it needs the
+confidently-wrong cases (n=212) and both directions of the symmetric pairs, or
+the comparison runs only on easy cases where every method agrees.
+
+---
+
+## Day 6–7 — Integrated Gradients + SHAP 🚧
 
 Next.
