@@ -205,6 +205,51 @@ def _dedupe_key(text: str) -> str:
 # Scan / filter / sample
 # --------------------------------------------------------------------------
 
+def load_pinned(path: Path, pinned: set[int]) -> pd.DataFrame:
+    """Re-extract exactly the complaint IDs recorded in data/splits.json.
+
+    The CFPB archive grows daily, so a fresh clone running `make data` would
+    otherwise sample a *different* 36k subset and reproduce none of the published
+    numbers. splits.json is committed and pins every ID, so when it is present we
+    select by ID instead of re-sampling. Cleaning still runs, so the narrative
+    text is regenerated identically rather than being trusted from cache.
+    """
+    member = _csv_member(path)
+    rows, found = [], set()
+
+    with zipfile.ZipFile(path) as zf, zf.open(member) as fh:
+        reader = pd.read_csv(
+            fh,
+            usecols=USECOLS,
+            chunksize=CHUNKSIZE,
+            dtype={COL_PRODUCT: "string", COL_NARRATIVE: "string", COL_DATE: "string"},
+        )
+        for i, chunk in enumerate(reader):
+            chunk = chunk[chunk[COL_ID].isin(pinned)]
+            for cid, product, narrative in zip(
+                chunk[COL_ID], chunk[COL_PRODUCT], chunk[COL_NARRATIVE]
+            ):
+                cleaned = clean_narrative(narrative)
+                if not cleaned:
+                    continue
+                found.add(int(cid))
+                rows.append({"complaint_id": int(cid), "narrative": cleaned,
+                             "product": str(product)})
+            if (i + 1) % 10 == 0:
+                print(f"\r[pinned] {len(found):,}/{len(pinned):,} recovered",
+                      end="", flush=True)
+
+    missing = pinned - found
+    print(f"\r[pinned] {len(found):,}/{len(pinned):,} recovered")
+    if missing:
+        raise RuntimeError(
+            f"{len(missing):,} pinned complaint IDs are not in this archive "
+            f"(CFPB withdraws complaints occasionally). Re-sample with "
+            f"`python -m src.data_prep --resample` and expect different numbers."
+        )
+    return pd.DataFrame(rows)
+
+
 def load_and_filter(path: Path) -> tuple[pd.DataFrame, dict[str, int]]:
     """Stream the archive, keeping a bounded uniform sample of eligible rows per class.
 
@@ -341,9 +386,13 @@ def stratified_split(df, seed: int = SEED):
             "per_class": PER_CLASS,
             "split": list(SPLIT),
             "categories": CATEGORIES,
-            "train": sorted(int(i) for i in train_df["complaint_id"]),
-            "val": sorted(int(i) for i in val_df["complaint_id"]),
-            "test": sorted(int(i) for i in test_df["complaint_id"]),
+            # Recorded in split order, not sorted. The order is what determines
+            # DataLoader batching, so sorting here would make a clean clone
+            # reconstruct the same *rows* in a different order and train a
+            # different model. The split is seeded, so this is equally stable.
+            "train": [int(i) for i in train_df["complaint_id"]],
+            "val": [int(i) for i in val_df["complaint_id"]],
+            "test": [int(i) for i in test_df["complaint_id"]],
         },
         indent=2,
     ) + "\n")
@@ -394,33 +443,54 @@ def _report(stats: dict[str, int], splits: dict[str, pd.DataFrame]) -> None:
           f"{totals[2]:>5,}  {sum(totals):>6,}")
 
 
-def main():
-    """Entry point for `make data`."""
+def main(resample: bool = False):
+    """Entry point for `make data`.
+
+    Default path re-extracts the exact IDs pinned in data/splits.json so a clean
+    clone reproduces the published numbers. `--resample` draws a fresh subsample
+    from whatever snapshot is on disk, which will produce different numbers.
+    """
     path = download()
 
     free_gb = shutil.disk_usage(ROOT).free / 1e9
     if free_gb < 2:
         print(f"[warn] only {free_gb:.1f} GB free", file=sys.stderr)
 
-    df, stats = load_and_filter(path)
-    df = balanced_sample(df)
-
     label2id = _write_label_map()
-    df["label"] = df["product"].map(label2id).astype("int16")
-
-    train_df, val_df, test_df = stratified_split(df)
-
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    splits = {"train": train_df, "val": val_df, "test": test_df}
+
+    if SPLITS_PATH.exists() and not resample:
+        pinned = json.loads(SPLITS_PATH.read_text())
+        print(f"[pinned] reproducing the split in {SPLITS_PATH.name} "
+              f"(seed {pinned['seed']}) -- pass --resample to draw a fresh sample")
+        ids = {name: [int(i) for i in pinned[name]] for name in ("train", "val", "test")}
+        df = load_pinned(path, {i for v in ids.values() for i in v})
+        df["label"] = df["product"].map(label2id).astype("int16")
+        by_id = df.set_index("complaint_id")
+        splits = {name: by_id.loc[v].reset_index() for name, v in ids.items()}
+        stats = None
+    else:
+        df, stats = load_and_filter(path)
+        df = balanced_sample(df)
+        df["label"] = df["product"].map(label2id).astype("int16")
+        train_df, val_df, test_df = stratified_split(df)
+        splits = {"train": train_df, "val": val_df, "test": test_df}
+
     for name, part in splits.items():
         out = PROCESSED_DIR / f"{name}.parquet"
         part[["complaint_id", "narrative", "product", "label"]].to_parquet(out, index=False)
         print(f"[write] {out.relative_to(ROOT)}  ({len(part):,} rows)")
     print(f"[write] {LABEL_MAP_PATH.relative_to(ROOT)}")
-    print(f"[write] {SPLITS_PATH.relative_to(ROOT)}")
 
-    _report(stats, splits)
+    if stats is not None:
+        print(f"[write] {SPLITS_PATH.relative_to(ROOT)}")
+        _report(stats, splits)
+    else:
+        print("\nClass balance")
+        for c in CATEGORIES:
+            counts = [int((splits[s]["product"] == c).sum()) for s in ("train", "val", "test")]
+            print(f"  {c:<52} {counts[0]:>6,} {counts[1]:>5,} {counts[2]:>5,}")
 
 
 if __name__ == "__main__":
-    main()
+    main(resample="--resample" in sys.argv)
