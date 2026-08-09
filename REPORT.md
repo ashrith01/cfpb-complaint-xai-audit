@@ -199,6 +199,24 @@ on MPS. Total grid runtime ~2h10m on the M4 Pro.
 **A fine-tuned transformer beats a bag-of-words baseline by 0.8 points of
 macro-F1** on this task — after ~2 hours of training versus 11 seconds.
 
+### …but the margin is statistically marginal
+
+| test | result |
+|---|---|
+| McNemar (paired, exact) | 282 baseline-wrong/BERT-right vs 230 the other way, **p = 0.0241** |
+| macro-F1 delta, bootstrap 95% CI (2,000 resamples) | **[+0.0002, +0.0164]** |
+| resamples where DistilBERT wins | 97.7% |
+
+The gain is significant at α=0.05, but **the lower bound of the interval is
++0.0002 — all but touching zero.** The honest statement is "DistilBERT beats
+TF-IDF, but by an amount this test set can only just resolve," not "DistilBERT is
+better." Any README claim must carry the interval, not the point estimate.
+
+Note also the paired counts: DistilBERT fixes 282 of the baseline's errors *and
+introduces 230 new ones of its own*. The net gain is small because the two models
+fail on largely different examples, not because the transformer is uniformly
+better.
+
 ### Correction made during this step
 
 The first run printed `delta +0.0050 BEATS baseline`, comparing DistilBERT's

@@ -53,7 +53,9 @@ interesting explanation-faithfulness behaviour — to concentrate there.
   confusion matrix at `results/figures/confusion_matrix.png`
 
 **Test macro-F1 0.8495 vs baseline 0.8411 — a +0.0084 gain** (both on the held-out
-test set). Best config: lr 5e-5, max_len 256, batch 16, best at **epoch 2 of 3**
+test set). ⚠️ **Statistically marginal:** McNemar p=0.0241, bootstrap 95% CI
+[+0.0002, +0.0164]. DistilBERT fixes 282 baseline errors and introduces 230 new
+ones. Any claim must carry the interval, not the point estimate. Best config: lr 5e-5, max_len 256, batch 16, best at **epoch 2 of 3**
 (epoch 3 overfit: val macro-F1 fell to 0.8504 while train loss kept dropping).
 
 Two things worth carrying into the explainability work:
