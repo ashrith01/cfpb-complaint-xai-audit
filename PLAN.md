@@ -97,27 +97,55 @@ not derived from text), dual-nature events ~30%, evidence absent from input ~20%
 - The Day 6–8 example set must be **stratified** (confidently-wrong + both
   directions of each symmetric pair), not random
 
-## Day 6–7 — Attribution methods (IG + SHAP)
-- [ ] `src/explain/integrated_gradients.py` via Captum
-- [ ] `src/explain/shap_explainer.py` — subsample test set (~500 examples, SHAP is slow on text)
-- [ ] Cache per-example token attributions to `results/explanations/`
-- **DoD:** attributions generated and cached for both methods on the same example set
+## Day 6–7 — Attribution methods (IG + SHAP) ✅
+- [x] `src/explain/integrated_gradients.py` via Captum
+- [x] `src/explain/shap_explainer.py` — same 500-example stratified set
+- [x] Cache per-example token attributions to `results/explanations/`
+- **DoD:** ✅ both cached on the identical example set
 
-## Day 8 — Attention rollout
-- [ ] `src/explain/attention_rollout.py` — weaker baseline explanation method
-- **DoD:** all 3 methods produce attributions on the same fixed example set
+IG 10.5 min (50 steps, convergence delta 0.055); SHAP 16.2 min (max_evals=200).
+⚠️ NFR3 (<30 min, full test set) is unachievable — IG alone is ~118 min for 5,400.
+Ran 500 stratified examples in ~27 min total and reported that honestly.
 
-## Day 9 — Faithfulness scoring
-- [ ] `src/faithfulness.py`: comprehensiveness (remove top-k% attributed tokens, measure prediction change)
-- [ ] sufficiency (keep only top-k% tokens, measure if prediction holds)
-- [ ] Decide top-k threshold upfront (start at 10%), don't tune it post-hoc to flatter results
-- **DoD:** faithfulness score per method, per example, aggregated into a table
+## Day 8 — Attention rollout ✅
+- [x] `src/explain/attention_rollout.py` — weaker baseline explanation method
+- **DoD:** ✅ all 3 methods on the same fixed example set, verified identical IDs + tokens
 
-## Day 10 — Disagreement / audit
-- [ ] `src/audit.py`: % overlap of top-3 tokens across methods, per example
-- [ ] Identify cases where a method is confidently wrong (high attribution weight, low faithfulness)
-- [ ] This is the headline finding — write it down in one sentence with a number
-- **DoD:** disagreement chart + failure-mode examples pulled out
+🐛 SDPA attention silently returns `None` for `output_attentions=True` (warning only,
+no exception) — would have shipped empty attributions. Fixed with eager load + guard.
+
+## Day 9 — Faithfulness scoring ✅
+- [x] `src/faithfulness.py`: comprehensiveness + sufficiency
+- [x] top-k = 10%, committed in code before any score existed
+- **DoD:** ✅ per-method, per-example, aggregated + per-stratum
+
+| method | comp ↑ | suff ↓ | rationale alone holds |
+|---|---|---|---|
+| **Integrated Gradients** | **0.455** | **0.003** | **94.4%** |
+| SHAP | 0.294 | −0.043 | 89.4% |
+| attention rollout | 0.263 | 0.117 | 82.2% |
+| *random (control)* | *0.031* | *0.467* | *46.2%* |
+
+Added a **random-attribution control** not in the original plan — without it the
+numbers are uninterpretable, since deleting any 10% moves the prediction somewhat.
+
+## Day 10 — Disagreement / audit ✅
+- [x] `src/audit.py`: top-3 overlap across methods, per example (in word space)
+- [x] Confidently-wrong + unfaithful cases identified
+- [x] Headline finding written → `results/headline_finding.md`
+- **DoD:** ✅ `results/figures/disagreement.png` + failure modes
+
+🔑 **HEADLINE:** methods agree on only **13–29%** of top-3 tokens (ceiling ~93%);
+SHAP vs attention share *zero* tokens on **66%** of examples. Faithfulness breaks
+the tie: **in 19.3% of confidently-wrong predictions, attention rollout was
+unfaithful while IG on the same example was not.**
+
+Independent check — IG puts the behaviourally-established brand token in its top-3
+**94.6%** of the time vs 73% for the others.
+
+⚠️ Withdrew a claim: my first chart title said "disagreement is worst where it
+matters most". It isn't — overlap is flat across strata (0.12–0.33). The honest
+reading is worse: it does **not improve** on confident predictions.
 
 ## Day 11 — Packaging
 - [ ] `Makefile` targets: `data`, `train`, `explain`, `audit`, `all`

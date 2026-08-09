@@ -47,6 +47,76 @@
       }
     }
   },
+  "disagreement": {
+    "attention_unfaithful_where_ig_faithful": 29,
+    "brand_token_test": {
+      "attention_rollout": {
+        "hits": 27,
+        "n": 37,
+        "rate": 0.7297
+      },
+      "integrated_gradients": {
+        "hits": 35,
+        "n": 37,
+        "rate": 0.9459
+      },
+      "shap": {
+        "hits": 27,
+        "n": 37,
+        "rate": 0.7297
+      }
+    },
+    "confident_but_unfaithful_counts": {
+      "attention_rollout": 38,
+      "integrated_gradients": 13,
+      "random": 135,
+      "shap": 36
+    },
+    "n_confident_wrong": 150,
+    "overlap_by_stratum": {
+      "integrated_gradients|attention_rollout": {
+        "confident_correct": 0.3222,
+        "confident_wrong": 0.3289,
+        "uncertain_correct": 0.2633,
+        "uncertain_wrong": 0.2333
+      },
+      "integrated_gradients|shap": {
+        "confident_correct": 0.2889,
+        "confident_wrong": 0.28,
+        "uncertain_correct": 0.3033,
+        "uncertain_wrong": 0.2767
+      },
+      "shap|attention_rollout": {
+        "confident_correct": 0.1222,
+        "confident_wrong": 0.1444,
+        "uncertain_correct": 0.13,
+        "uncertain_wrong": 0.1333
+      }
+    },
+    "pairwise_overlap": {
+      "integrated_gradients|attention_rollout": {
+        "full_agreement_rate": 0.006,
+        "mean": 0.2947,
+        "median": 0.3333,
+        "zero_overlap_rate": 0.284
+      },
+      "integrated_gradients|shap": {
+        "full_agreement_rate": 0.028,
+        "mean": 0.2867,
+        "median": 0.3333,
+        "zero_overlap_rate": 0.394
+      },
+      "shap|attention_rollout": {
+        "full_agreement_rate": 0.004,
+        "mean": 0.1327,
+        "median": 0.0,
+        "zero_overlap_rate": 0.66
+      }
+    },
+    "self_agreement_ceiling": 0.93,
+    "shap_max_evals": 200,
+    "top_k": 3
+  },
   "error_analysis": {
     "error_rate": 0.1504,
     "lexical_shortcut": {
@@ -110,6 +180,143 @@
         "true": "debt_collection"
       }
     ]
+  },
+  "faithfulness": {
+    "methods": {
+      "attention_rollout": {
+        "by_stratum": {
+          "confident_correct": {
+            "comprehensiveness_mean": 0.2023,
+            "n": 150,
+            "sufficiency_mean": 0.0703
+          },
+          "confident_wrong": {
+            "comprehensiveness_mean": 0.3404,
+            "n": 150,
+            "sufficiency_mean": 0.1336
+          },
+          "uncertain_correct": {
+            "comprehensiveness_mean": 0.2735,
+            "n": 100,
+            "sufficiency_mean": 0.0927
+          },
+          "uncertain_wrong": {
+            "comprehensiveness_mean": 0.2276,
+            "n": 100,
+            "sufficiency_mean": 0.1884
+          }
+        },
+        "comprehensiveness_mean": 0.263,
+        "comprehensiveness_median": 0.1252,
+        "comprehensiveness_weighted": 0.2235,
+        "n": 500,
+        "pred_flipped_after_removal": 0.318,
+        "pred_held_on_rationale_only": 0.822,
+        "sufficiency_mean": 0.1174,
+        "sufficiency_median": 0.0174,
+        "sufficiency_weighted": 0.09
+      },
+      "integrated_gradients": {
+        "by_stratum": {
+          "confident_correct": {
+            "comprehensiveness_mean": 0.3433,
+            "n": 150,
+            "sufficiency_mean": 0.0273
+          },
+          "confident_wrong": {
+            "comprehensiveness_mean": 0.5815,
+            "n": 150,
+            "sufficiency_mean": 0.0325
+          },
+          "uncertain_correct": {
+            "comprehensiveness_mean": 0.4747,
+            "n": 100,
+            "sufficiency_mean": -0.0658
+          },
+          "uncertain_wrong": {
+            "comprehensiveness_mean": 0.4127,
+            "n": 100,
+            "sufficiency_mean": -0.0116
+          }
+        },
+        "comprehensiveness_mean": 0.4549,
+        "comprehensiveness_median": 0.4351,
+        "comprehensiveness_weighted": 0.3842,
+        "n": 500,
+        "pred_flipped_after_removal": 0.528,
+        "pred_held_on_rationale_only": 0.944,
+        "sufficiency_mean": 0.0025,
+        "sufficiency_median": 0.0013,
+        "sufficiency_weighted": 0.0063
+      },
+      "random": {
+        "by_stratum": {
+          "confident_correct": {
+            "comprehensiveness_mean": 0.0169,
+            "n": 150,
+            "sufficiency_mean": 0.4719
+          },
+          "confident_wrong": {
+            "comprehensiveness_mean": 0.0324,
+            "n": 150,
+            "sufficiency_mean": 0.5747
+          },
+          "uncertain_correct": {
+            "comprehensiveness_mean": 0.0279,
+            "n": 100,
+            "sufficiency_mean": 0.4398
+          },
+          "uncertain_wrong": {
+            "comprehensiveness_mean": 0.0549,
+            "n": 100,
+            "sufficiency_mean": 0.3267
+          }
+        },
+        "comprehensiveness_mean": 0.0314,
+        "comprehensiveness_median": 0.0013,
+        "comprehensiveness_weighted": 0.0238,
+        "n": 500,
+        "pred_flipped_after_removal": 0.062,
+        "pred_held_on_rationale_only": 0.462,
+        "sufficiency_mean": 0.4672,
+        "sufficiency_median": 0.491,
+        "sufficiency_weighted": 0.4539
+      },
+      "shap": {
+        "by_stratum": {
+          "confident_correct": {
+            "comprehensiveness_mean": 0.2519,
+            "n": 150,
+            "sufficiency_mean": 0.0371
+          },
+          "confident_wrong": {
+            "comprehensiveness_mean": 0.3415,
+            "n": 150,
+            "sufficiency_mean": -0.0107
+          },
+          "uncertain_correct": {
+            "comprehensiveness_mean": 0.2999,
+            "n": 100,
+            "sufficiency_mean": -0.1506
+          },
+          "uncertain_wrong": {
+            "comprehensiveness_mean": 0.2798,
+            "n": 100,
+            "sufficiency_mean": -0.1024
+          }
+        },
+        "comprehensiveness_mean": 0.294,
+        "comprehensiveness_median": 0.2037,
+        "comprehensiveness_weighted": 0.2672,
+        "n": 500,
+        "pred_flipped_after_removal": 0.468,
+        "pred_held_on_rationale_only": 0.894,
+        "sufficiency_mean": -0.0427,
+        "sufficiency_median": -0.0157,
+        "sufficiency_weighted": -0.0144
+      }
+    },
+    "top_k_pct": 0.1
   },
   "finetune": {
     "best_config": {

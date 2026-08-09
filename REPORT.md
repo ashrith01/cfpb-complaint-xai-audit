@@ -9,7 +9,7 @@ the code afterwards.
 - **Day-by-day checklist:** [`PLAN.md`](./PLAN.md)
 - **Final polished report:** [`README.md`](./README.md) (written Day 12)
 
-**Status:** Days 1–5 complete. Days 6–7 (IG + SHAP) next.
+**Status:** Days 1–10 complete. Days 11–12 (packaging + report) next.
 
 | Day | Work | Status | Key number |
 |---|---|---|---|
@@ -17,10 +17,10 @@ the code afterwards.
 | 2 | TF-IDF + LogReg baseline | ✅ | test macro-F1 **0.8411** |
 | 3–4 | Fine-tune DistilBERT | ✅ | test macro-F1 **0.8495** (+0.0084) |
 | 5 | Error analysis | ✅ | 15.0% error rate; **lexical shortcut found** |
-| 6–7 | Integrated Gradients + SHAP | ⬜ | |
-| 8 | Attention rollout | ⬜ | |
-| 9 | Faithfulness scoring | ⬜ | |
-| 10 | Disagreement / audit | ⬜ | |
+| 6–7 | Integrated Gradients + SHAP | ✅ | 500 examples, same set |
+| 8 | Attention rollout | ✅ | 9s, all 3 aligned |
+| 9 | Faithfulness scoring | ✅ | IG **0.455** > SHAP 0.294 > attn 0.263 > random 0.031 |
+| 10 | Disagreement / audit | ✅ | **19.3%** attn unfaithful where IG faithful |
 | 11 | Packaging | ⬜ | |
 | 12 | Report | ⬜ | |
 
@@ -394,6 +394,142 @@ the comparison runs only on easy cases where every method agrees.
 
 ---
 
-## Day 6–7 — Integrated Gradients + SHAP 🚧
+## Days 6–8 — Attribution methods ✅
+
+All three explainers run on the **same 500 stratified examples**, targeting the
+model's **predicted** class (not the true label — the question is what drove the
+decision, which stays well-posed when the decision is wrong, and Day 5 found ~40%
+of errors are mislabelled ground truth anyway).
+
+| method | runtime | notes |
+|---|---|---|
+| Integrated Gradients (Captum) | 10.5 min | 50 steps, convergence delta mean 0.055 |
+| SHAP (PartitionExplainer) | 16.2 min | max_evals=200, chosen by measurement |
+| attention rollout | 9 s | not class-conditioned — the intentional weak baseline |
+
+### Two bugs that would have silently corrupted the audit
+
+**Attention rollout produced nothing.** The checkpoint loads with PyTorch's SDPA
+attention kernel, which does not support `output_attentions=True` and returns
+`None` with only a *warning*. Had a downstream index not tripped, the third method
+could have shipped empty attributions. Fixed with an explicit eager load and a
+guard that raises a clear error.
+
+**SHAP was explaining text the model cannot read.** Its Text masker tokenizes the
+*raw* string, so it perturbed up to **2,214 tokens against the model's 254-token
+window**, with 35.4% of the example set truncated by the model. The attribution
+values out there were correctly ~0 (1.1% of mass), so this was not wrong in the
+obvious way — the damage was precision: a fixed 200-evaluation budget spread over
+up to 9× more tokens than the model consumes, worst on exactly the long
+narratives where attribution is hardest. Now truncated to the model window first,
+verified prediction-preserving to 0.00000 mean probability change.
+
+The second is the kind of bug that would have quietly weakened SHAP and produced
+a confident, wrong headline about which method to trust.
+
+### Operational note
+
+The machine was deep into swap (10.7 GB of 12 GB) and the OS killed the SHAP run
+twice. SHAP now checkpoints every 10 examples and resumes, so a kill costs 10
+examples rather than the whole run — the difference between a step that
+eventually finishes and one that never does.
+
+---
+
+## Day 9 — Faithfulness ✅
+
+`TOP_K_PCT = 0.10`, committed in code before any score existed. Definitions follow
+DeYoung et al. (2020): comprehensiveness = confidence lost when the top-10% is
+removed (**higher is better**); sufficiency = confidence lost when *only* the
+top-10% is kept (**lower is better**).
+
+| method | comp ↑ | suff ↓ | comp (reweighted) | pred flips on removal | rationale alone holds |
+|---|---|---|---|---|---|
+| **Integrated Gradients** | **0.455** | **0.003** | 0.384 | 52.8% | **94.4%** |
+| SHAP | 0.294 | −0.043 | 0.267 | 46.8% | 89.4% |
+| attention rollout | 0.263 | 0.117 | 0.224 | 31.8% | 82.2% |
+| *random (control)* | *0.031* | *0.467* | *0.024* | *6.2%* | *46.2%* |
+
+**The random control is what makes this readable.** Deleting 10% of any text moves
+a prediction somewhat; a method earns credit only by beating arbitrary deletion.
+All three clear it comfortably — so all three carry real signal — but the spread
+between them is large, and attention rollout recovers only **55%** of the
+faithfulness IG does over that baseline.
+
+SHAP's **negative sufficiency (−0.043)** is a real effect, not noise: keeping only
+its top-10% *raises* confidence above the full text, because the discarded 90%
+contains evidence arguing against the prediction. A rationale can be more
+persuasive to the model than the document it came from.
+
+Ranking uses **signed** attribution, not absolute value. A large negative score
+means the token argues *against* the prediction, so removing it should push
+confidence up. Ranking by `|score|` would blend supporting and opposing evidence
+and systematically blunt comprehensiveness for the two methods that can express
+opposition — biasing the comparison toward the method expected to be worst.
+
+---
+
+## Day 10 — Disagreement audit ✅
+
+Cross-method comparison is done in **word space** (wordpieces merged, attributions
+summed), because IG/rollout attribute to wordpieces and SHAP to word spans;
+comparing raw token lists would score tokenisation artefacts as disagreement.
+
+### Pairwise top-3 overlap — against a ~0.93 ceiling, not 1.0
+
+| pair | mean overlap | share with **zero** shared tokens |
+|---|---|---|
+| IG vs SHAP | 0.287 | 39.4% |
+| IG vs attention | 0.295 | 28.4% |
+| SHAP vs attention | **0.133** | **66.0%** |
+
+SHAP and attention rollout share **no top-3 token at all on two-thirds of
+examples** — about the same prediction, of the same model.
+
+### Confidently wrong *and* unfaithful (of 150 confident-wrong examples)
+
+| method | count | rate |
+|---|---|---|
+| Integrated Gradients | 13 | 8.7% |
+| SHAP | 36 | 24.0% |
+| attention rollout | 38 | 25.3% |
+| *random* | *135* | *90.0%* |
+
+**In 19.3% of confidently-wrong predictions, attention rollout's explanation was
+unfaithful while Integrated Gradients' explanation of the same example was not.**
+That is the decision-relevant number: not "both methods are imperfect" but "one
+was right and one was not, on the cases that matter most."
+
+### Independent check against the Day 5 behavioural prior
+
+Day 5 established without any attribution method that the model keys on
+money-service brand names (accuracy 0.955 with one named, 0.118 without). Asked to
+explain those same predictions:
+
+| method | brand token in top-3 |
+|---|---|
+| Integrated Gradients | **94.6%** (35/37) |
+| SHAP | 73.0% |
+| attention rollout | 73.0% |
+
+IG almost always recovers the cue the model demonstrably relies on. This is the
+rarest thing in explainability work — a partial ground truth — and it agrees with
+the faithfulness ranking derived independently.
+
+### A claim I had to withdraw
+
+My first version of the disagreement figure was titled *"Disagreement is worst
+where it matters most."* The data say otherwise: overlap is essentially **flat**
+across strata (0.12–0.33), and IG-vs-attention is in fact *highest* on
+confidently-wrong examples (0.329). The title asserted a trend the chart itself
+contradicted.
+
+The honest reading is less tidy and more damning: disagreement **does not improve**
+on the confident predictions a reviewer is most likely to trust. Corrected in both
+the figure and `results/headline_finding.md`.
+
+---
+
+## Day 11–12 — Packaging & report 🚧
 
 Next.

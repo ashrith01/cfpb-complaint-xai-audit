@@ -35,12 +35,21 @@ N_PER_PAIR = 10
 SNIPPET_CHARS = 700
 
 
-def load_model():
+def load_model(attn_implementation: str | None = None):
+    """Load the fine-tuned checkpoint.
+
+    `attn_implementation="eager"` is required by attention_rollout: the default
+    SDPA kernel does not support `output_attentions=True` and returns None with
+    only a warning rather than raising.
+    """
     if not (MODEL_DIR / "config.json").exists():
         raise FileNotFoundError(f"{MODEL_DIR} missing -- run `make train` first")
     config = json.loads((MODEL_DIR / "train_config.json").read_text())
     tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
-    model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR).to(_device())
+    kwargs = {"attn_implementation": attn_implementation} if attn_implementation else {}
+    model = AutoModelForSequenceClassification.from_pretrained(
+        MODEL_DIR, **kwargs
+    ).to(_device())
     return model, tokenizer, config
 
 

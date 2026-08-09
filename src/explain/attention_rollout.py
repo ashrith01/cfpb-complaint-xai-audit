@@ -44,6 +44,12 @@ def rollout(attentions: tuple[torch.Tensor, ...]) -> torch.Tensor:
     attentions: tuple of (batch, heads, seq, seq), one per layer.
     Returns (seq,) -- the [CLS] row of the composed matrix.
     """
+    if not attentions or attentions[0] is None:
+        raise RuntimeError(
+            "model returned no attentions -- load it with "
+            'attn_implementation="eager"; the SDPA kernel silently ignores '
+            "output_attentions=True"
+        )
     result = None
     for layer in attentions:
         # Average over heads, then account for the residual stream: without the
@@ -71,7 +77,7 @@ def explain(model, tokenizer, text: str, max_len: int = 256):
 
 def main():
     """Entry point for the attention-rollout portion of `make explain`."""
-    model, tokenizer, cfg = load_model()
+    model, tokenizer, cfg = load_model(attn_implementation="eager")
     model.eval()
     examples = build_example_set()
 
