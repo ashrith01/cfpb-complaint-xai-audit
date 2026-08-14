@@ -9,7 +9,7 @@ the code afterwards.
 - **Day-by-day checklist:** [`PLAN.md`](./PLAN.md)
 - **Final polished report:** [`README.md`](./README.md) (written Day 12)
 
-**Status:** Days 1–10 complete. Days 11–12 (packaging + report) next.
+**Status:** ✅ Complete — all 12 days delivered.
 
 | Day | Work | Status | Key number |
 |---|---|---|---|
@@ -21,8 +21,8 @@ the code afterwards.
 | 8 | Attention rollout | ✅ | 9s, all 3 aligned |
 | 9 | Faithfulness scoring | ✅ | IG **0.455** > SHAP 0.294 > attn 0.263 > random 0.031 |
 | 10 | Disagreement / audit | ✅ | **19.3%** attn unfaithful where IG faithful |
-| 11 | Packaging | ⬜ | |
-| 12 | Report | ⬜ | |
+| 11 | Packaging | ✅ | 32 tests; clean-clone reproduces byte-identically |
+| 12 | Report | ✅ | README as technical report, 4 figures |
 
 ---
 
@@ -530,6 +530,72 @@ the figure and `results/headline_finding.md`.
 
 ---
 
-## Day 11–12 — Packaging & report 🚧
+## Day 11 — Packaging ✅
 
-Next.
+**Tests (32, `make test`).** Targeted at the two places a silent bug would corrupt
+results without failing anything: `clean_narrative`, whose output is frozen into
+the committed dataset, and the faithfulness/overlap primitives the headline rests
+on. Every cleaning case is one actually observed in the CFPB data that the regex
+got wrong at some point — including EXXON/TJ MAXX and redaction runs glued to
+digits.
+
+**Fresh-clone test.** Cloned the repo to a clean directory, `uv pip sync`, ran the
+suite (32 passed) and `make data` — which reproduced `train/val/test.parquet`
+**byte-identically**. The archive was symlinked rather than re-downloaded to save
+1.4 GB; the download path itself was exercised on Day 1.
+
+**New measurement — what is actually *in* each method's top-3:**
+
+| method | stopword/punct | punctuation | ≥1 punct in top-3 |
+|---|---|---|---|
+| Integrated Gradients | 9.6% | 2.4% | 7.0% |
+| SHAP | 28.5% | 5.9% | 16.4% |
+| **attention rollout** | **30.3%** | **23.8%** | **67.6%** |
+
+This is the **mechanism** behind attention rollout's low comprehensiveness rather
+than a restatement of it. It ranks pure punctuation in its top-3 ten times more
+often than IG, and two-thirds of its explanations contain a punctuation mark in
+the top three. A period is not evidence for a product category, and deleting one
+does not move the model — so comprehensiveness is low *because* the rationale is
+partly non-evidence.
+
+**Example walkthroughs** (`src/report_figures.py`) selected by criteria —
+confident_wrong, IG comprehensiveness ≥ 0.30, attention < 0.05 — not by eye. In
+both, attention rollout's single highest-attributed token is a full stop.
+
+---
+
+## Day 12 — Report ✅
+
+README rewritten as a technical report: headline finding in the first paragraph
+with a number, four figures, honest limitations, reproduction steps.
+
+### Resume bullet (BRD §13, filled with real numbers)
+
+> Fine-tuned DistilBERT for CFPB complaint routing (8 classes, macro-F1 0.85) and
+> built a faithfulness audit of its explainability layer (Integrated Gradients,
+> SHAP, attention rollout) — found the three methods agreed on only 13–29% of
+> their top-attributed tokens, and that attention-based explanations were
+> unfaithful in 19.3% of high-confidence errors where gradient-based explanations
+> were not.
+
+### What I would flag to a reader
+
+The project's *stated* goal was a classifier plus an explainability layer. The
+classifier turned out to be the least interesting part — +0.008 macro-F1 over
+bag-of-words, statistically marginal, against a labelling ceiling that hand
+review put near where the model already sits. The value is entirely in the audit,
+and in the fact that the audit's conclusion is supported by **two independent
+routes** (perturbation-based faithfulness, and a behavioural shortcut established
+before any attribution method ran) that were not designed to agree.
+
+### Known gaps, stated rather than hidden
+
+- 500 examples, one model, one dataset — the ranking replicates twice here, the
+  magnitudes do not generalise
+- Comprehensiveness/sufficiency create out-of-distribution inputs; the random
+  control bounds this but does not remove it
+- The 255 MB checkpoint is not committed (all derived results are), so the audit
+  is inspectable without retraining but the model must be regenerated
+- `make all` end-to-end is ~2h40m, dominated by the fine-tune grid; stages were
+  validated individually plus a clean-clone `make data`, not as one 3-hour run

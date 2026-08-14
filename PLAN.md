@@ -147,17 +147,32 @@ Independent check — IG puts the behaviourally-established brand token in its t
 matters most". It isn't — overlap is flat across strata (0.12–0.33). The honest
 reading is worse: it does **not improve** on confident predictions.
 
-## Day 11 — Packaging
-- [ ] `Makefile` targets: `data`, `train`, `explain`, `audit`, `all`
-- [ ] `requirements.txt` pinned
-- [ ] Fresh-clone test: does `make all` actually run end-to-end?
-- **DoD:** clean clone → `make all` succeeds without manual intervention
+## Day 11 — Packaging ✅
+- [x] `Makefile` targets: `setup`, `lock`, `test`, `data`, `train`, `evaluate`, `explain`, `audit`, `figures`, `all`
+- [x] `requirements.txt` pinned (uv lock from `requirements.in`)
+- [x] Fresh-clone test
+- **DoD:** ✅ clean clone → deps sync, 32 tests pass, `make data` reproduces
+  train/val/test **byte-identically**
 
-## Day 12 — Report
-- [ ] Fill in README "Headline finding" section
-- [ ] 4–5 final figures (confusion matrix, faithfulness comparison, disagreement chart, 2 example walkthroughs)
-- [ ] Resume bullet finalized with real numbers (see BRD §13)
-- **DoD:** a stranger can read the README in <5 min and understand the finding
+Added 32 tests covering `clean_narrative` (frozen into the committed dataset) and
+the faithfulness/overlap primitives the headline rests on.
+
+🔑 New measurement — attention rollout ranks **pure punctuation** in its top-3
+**23.8%** of the time (67.6% of explanations contain ≥1), vs 2.4% for IG. That is
+the *mechanism* behind its low comprehensiveness, not a restatement of it.
+
+## Day 12 — Report ✅
+- [x] README rewritten as a technical report, headline finding in paragraph 1
+- [x] Figures: confusion matrix, disagreement + faithfulness (3 panels), 2 example walkthroughs
+- [x] Resume bullet with real numbers
+- **DoD:** ✅ finding stated with a number in the first paragraph
+
+> Fine-tuned DistilBERT for CFPB complaint routing (8 classes, macro-F1 0.85) and
+> built a faithfulness audit of its explainability layer (Integrated Gradients,
+> SHAP, attention rollout) — found the three methods agreed on only 13–29% of
+> their top-attributed tokens, and that attention-based explanations were
+> unfaithful in 19.3% of high-confidence errors where gradient-based explanations
+> were not.
 
 ## Guardrails (re-read if scope creep starts)
 - No explaining generative output — classification only
