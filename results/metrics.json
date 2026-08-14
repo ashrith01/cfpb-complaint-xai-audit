@@ -72,6 +72,23 @@
       "random": 135,
       "shap": 36
     },
+    "junk_token_audit": {
+      "attention_rollout": {
+        "examples_with_any_punctuation": 0.676,
+        "top3_junk_share": 0.3033,
+        "top3_punctuation_share": 0.238
+      },
+      "integrated_gradients": {
+        "examples_with_any_punctuation": 0.07,
+        "top3_junk_share": 0.096,
+        "top3_punctuation_share": 0.024
+      },
+      "shap": {
+        "examples_with_any_punctuation": 0.164,
+        "top3_junk_share": 0.2853,
+        "top3_punctuation_share": 0.0587
+      }
+    },
     "n_confident_wrong": 150,
     "overlap_by_stratum": {
       "integrated_gradients|attention_rollout": {

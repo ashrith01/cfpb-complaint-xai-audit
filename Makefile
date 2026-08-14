@@ -1,4 +1,4 @@
-.PHONY: setup lock data train evaluate explain audit all clean
+.PHONY: setup lock test data train evaluate explain audit figures all clean
 
 PY := .venv/bin/python
 
@@ -11,6 +11,12 @@ setup:
 lock:
 	uv pip compile requirements.in -o requirements.txt --python-version 3.14
 
+test:
+	$(PY) -m pytest tests/ -q
+
+# Reproduces the exact 36,000 complaints pinned in data/splits.json.
+# Add --resample to draw a fresh sample from a newer CFPB snapshot instead
+# (this will change every downstream number).
 data:
 	$(PY) -m src.data_prep
 
@@ -29,7 +35,11 @@ audit:
 	$(PY) -m src.faithfulness
 	$(PY) -m src.audit
 
-all: data train evaluate explain audit
+figures:
+	$(PY) -m src.report_figures
+
+all: data train evaluate explain audit figures
 
 clean:
-	rm -rf data/processed/* results/explanations/* results/figures/*
+	rm -rf data/processed/*.parquet results/explanations/*.json \
+	       results/figures/* results/model

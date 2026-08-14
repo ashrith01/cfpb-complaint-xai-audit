@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import re
+import string
 from itertools import combinations
 
 import numpy as np
@@ -138,6 +139,43 @@ def brand_token_test(word_attr, examples) -> dict:
     return results
 
 
+# Function words and punctuation cannot be evidence for a product category. If a
+# method ranks them top-3 it is not identifying rationale, and removing them will
+# barely move the model -- which is the mechanism behind a low comprehensiveness
+# score rather than a restatement of it.
+_STOPWORDS = set(
+    "the a an and or of to in is was for i my me it that this on at be with have "
+    "has had they them you we as not but if then so all any are were do did does "
+    "from by".split()
+)
+
+
+def _is_junk(word: str) -> bool:
+    return all(c in string.punctuation for c in word) or word in _STOPWORDS
+
+
+def junk_token_audit(word_attr) -> dict:
+    """Share of each method's top-3 that is punctuation or a function word."""
+    out = {}
+    for method in METHODS:
+        junk, punct = [], []
+        for attr in word_attr[method].values():
+            top = top_k_words(attr, TOP_K)
+            if not top:
+                continue
+            junk.append(sum(_is_junk(w) for w in top) / len(top))
+            punct.append(
+                sum(all(c in string.punctuation for c in w) for w in top) / len(top)
+            )
+        out[method] = {
+            "top3_junk_share": round(float(np.mean(junk)), 4),
+            "top3_punctuation_share": round(float(np.mean(punct)), 4),
+            "examples_with_any_punctuation": round(
+                float(np.mean([p > 0 for p in punct])), 4),
+        }
+    return out
+
+
 def _plot(pairwise, per_stratum, faith) -> None:
     import matplotlib
     matplotlib.use("Agg")
@@ -224,6 +262,7 @@ def summarize():
 
     unfaithful = find_confident_but_unfaithful(per_example)
     brand = brand_token_test(word_attr, examples)
+    junk = junk_token_audit(word_attr)
     _plot(pairwise, per_stratum, faith)
 
     # The precise claim: attention fails where IG succeeds, on the same example.
@@ -246,6 +285,7 @@ def summarize():
         "n_confident_wrong": len(cw_ids),
         "attention_unfaithful_where_ig_faithful": ar_bad_ig_ok,
         "brand_token_test": brand,
+        "junk_token_audit": junk,
     }
     update_metrics("disagreement", payload)
 
@@ -274,6 +314,14 @@ def summarize():
 
     print(f"\nattention unfaithful WHERE IG faithful (same example): "
           f"{ar_bad_ig_ok}/{n_cw} ({ar_bad_ig_ok / n_cw:.1%})")
+
+    print(f"\nWhat is in the top-{TOP_K}? (punctuation and function words cannot be "
+          f"evidence for a product category)")
+    print(f"  {'method':<22}{'stopword/punct':>16}{'punctuation':>14}"
+          f"{'>=1 punct':>12}")
+    for m, v in junk.items():
+        print(f"  {m:<22}{v['top3_junk_share']:>15.1%}{v['top3_punctuation_share']:>14.1%}"
+              f"{v['examples_with_any_punctuation']:>12.1%}")
 
     _write_finding(pairwise, per_stratum, faith, unfaithful, brand, n_cw, ar_bad_ig_ok)
     print(f"\nwrote {FIGURES_DIR / 'disagreement.png'}")

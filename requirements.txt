@@ -76,6 +76,8 @@ idna==3.18
     #   httpx
     #   requests
     #   yarl
+iniconfig==2.3.0
+    # via pytest
 jinja2==3.1.6
     # via torch
 joblib==1.5.3
@@ -132,6 +134,7 @@ packaging==26.3
     #   huggingface-hub
     #   matplotlib
     #   peft
+    #   pytest
     #   shap
     #   transformers
 pandas==3.0.5
@@ -143,6 +146,8 @@ peft==0.20.0
     # via -r requirements.in
 pillow==12.3.0
     # via matplotlib
+pluggy==1.6.0
+    # via pytest
 propcache==0.5.2
     # via
     #   aiohttp
@@ -156,9 +161,13 @@ pyarrow==25.0.0
     #   -r requirements.in
     #   datasets
 pygments==2.20.0
-    # via rich
+    # via
+    #   pytest
+    #   rich
 pyparsing==3.3.2
     # via matplotlib
+pytest==9.1.1
+    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
     #   matplotlib
