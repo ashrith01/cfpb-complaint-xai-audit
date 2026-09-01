@@ -7,7 +7,7 @@ data/raw/*.csv
 data/raw/*.zip
 data/raw/.headers.txt
 data/processed/*.parquet
-results/explanations/*.json
+results/explanations/*.partial.json
 results/model/
 *.ipynb_checkpoints
 .env
