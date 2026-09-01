@@ -164,6 +164,42 @@ test-set-level claims can be made honestly.
 
 ---
 
+## Data, provenance and reuse
+
+**Source.** [CFPB Consumer Complaint Database](https://www.consumerfinance.gov/data-research/consumer-complaints/),
+bulk archive fetched 2026-08-06. `data/raw/SOURCE.txt` records the exact snapshot
+— URL, byte count and the server's `Last-Modified` — because the database grows
+daily and results are only reproducible against a known one. As a work of the US
+federal government the database is in the **public domain**; the CFPB publishes
+it expressly for research and analysis.
+
+**Complaints are allegations, not findings.** The CFPB does not verify what
+consumers write. Narratives reproduced here name companies in the consumer's own
+words, and the existence of a complaint is not evidence that the company did
+anything wrong. They are used strictly as text-classification inputs. Nothing in
+this repository is a claim about any named company.
+
+**Personal data.** The CFPB scrubs personally identifiable information before
+publishing, leaving `XXXX` placeholders that `clean_narrative()` then strips. A
+scan of all 5,400 redistributed test narratives for email addresses, phone
+numbers, SSN patterns, digit runs of 9+, street addresses, URLs and residual
+redaction markers returned **no personal data**. No attempt is made to
+re-identify anyone, and no derived artifact here adds information the CFPB has
+not already published.
+
+**What is redistributed, and why.** The 5,400 test narratives
+(`results/predictions_test.parquet`), the 500-example audit set, and the
+per-example attributions — so the audit is inspectable without a 2-hour retrain.
+Nothing depends on these copies: `data/splits.json` pins all 36,000 complaint
+IDs, so `make data` re-fetches from the CFPB directly and reproduces the dataset
+byte-identically.
+
+**Licence.** Code and written analysis are MIT ([`LICENSE`](LICENSE)). The
+complaint data is public domain and is not licensed by me — cite the CFPB as its
+source.
+
+---
+
 ## Repo layout
 
 ```
