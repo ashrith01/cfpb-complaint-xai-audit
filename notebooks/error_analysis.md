@@ -51,7 +51,7 @@ complaint.** Where a money-service is named, it is 95.5% accurate. Where it isn'
 accuracy falls to 53.3% — and on the 34 money-transfer complaints that use *only*
 bank vocabulary, it collapses to **11.8%**, far below the 12.5% random-guess rate
 for 8 balanced classes. Symmetrically, checking/savings complaints that happen to
-mention Venmo get misclassified 55.8% of the time.
+mention a money service get misclassified 55.8% of the time.
 
 This is a shortcut that works, because the correlation is real and strong. It is
 also exactly the kind of decision rule a compliance reviewer would want to know
@@ -74,6 +74,13 @@ Based on a hand review of all 40 sampled errors (10 per top pair, highest
 confidence first). Proportions are approximate — a 40-example read, not a
 measurement.
 
+Institutions named in individual complaints are described by type below
+("a credit bureau", "a peer-to-peer payment service") rather than by name. CFPB
+complaints are unverified consumer allegations, and nothing here is a claim about
+any company; the classification analysis does not depend on which one it was. The
+money-service *term list* in the shortcut test above is unchanged — it defines the
+experiment rather than describing any one complaint.
+
 ### 1. Mislabeled ground truth — the label contradicts the narrative (~40%)
 
 The CFPB product field is **chosen by the consumer when filing**, not derived
@@ -81,13 +88,13 @@ from the text. In a substantial share of cases the model's prediction fits the
 narrative better than the gold label does.
 
 - *true `checking_savings`, predicted `money_transfer`, p=0.990* — the narrative
-  is entirely about Zelle's identity-verification design and fraudsters linking
-  victim tokens. Nothing about a bank account.
-- *true `checking_savings`, predicted `money_transfer`, p=0.948* — a Coinbase
-  account takeover. Cryptocurrency is explicitly inside the money_transfer class
-  definition.
+  is entirely about a peer-to-peer payment service's identity-verification
+  design and fraudsters linking victim tokens. Nothing about a bank account.
+- *true `checking_savings`, predicted `money_transfer`, p=0.948* — a
+  cryptocurrency-exchange account takeover. Cryptocurrency is explicitly inside
+  the money_transfer class definition.
 - *true `debt_collection`, predicted `credit_reporting`, p=0.953* — a formal FCRA
-  §605 dispute letter addressed to TransUnion's dispute department.
+  §605 dispute letter addressed to a credit bureau's dispute department.
 
 Consequence for the audit: **an unfaithful-looking explanation of a "wrong"
 prediction may be a faithful explanation of a right one.** Days 9–10 must not
@@ -101,7 +108,7 @@ One event that legitimately belongs to two products. No single label is correct.
 - A collections account appearing on a credit report is one event filed under
   either `debt_collection` or `credit_reporting`; several narratives cite FDCPA
   **and** FCRA in the same paragraph.
-- A fraudulent wire sent via ACH through Bank of America is simultaneously a
+- A fraudulent wire sent via ACH through a retail bank is simultaneously a
   transfer complaint and a bank-account complaint.
 
 This is an irreducible ceiling. It is the most likely explanation for why the
@@ -115,15 +122,15 @@ Two distinct mechanisms, same consequence:
 **Redaction removed the deciding token.** CFPB scrubs brand names inconsistently.
 Several money_transfer narratives read as pure checking-account complaints
 because the service name was redacted out — *"their decision to block my access
-to ▮ … I had previously been using ▮ through my PenFed savings account"* is
-almost certainly Zelle, and with that word removed the remaining text supports
-the model's `checking_savings` prediction.
+to ▮ … I had previously been using ▮ through my ▮ savings account"* is almost
+certainly a peer-to-peer payment service, and with that word removed the
+remaining text supports the model's `checking_savings` prediction.
 
-**The label depends on institution type, not content.** Chime and Relay Financial
-are money-services businesses, not banks, so complaints about them are filed under
-money_transfer even when the narrative describes an ordinary checking-account
-problem (a refused mobile deposit, a delayed direct deposit). That fact lives in
-the company's registration, not in the text.
+**The label depends on institution type, not content.** Several consumer fintech
+apps are registered as money-services businesses rather than banks, so complaints
+about them are filed under money_transfer even when the narrative describes an
+ordinary checking-account problem (a refused mobile deposit, a delayed direct
+deposit). That fact lives in the company's registration, not in the text.
 
 Consequence for the audit: **no attribution method can be faithful about evidence
 that is absent.** These cases put a hard floor under achievable faithfulness, and

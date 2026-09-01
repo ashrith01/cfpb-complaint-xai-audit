@@ -106,8 +106,8 @@ resolvable-but-small edge over eleven seconds of bag-of-words.
 
 **Ceiling, not shortfall.** Hand-reviewing 40 errors found ~40% are *mislabelled
 ground truth* — the CFPB product field is chosen by the consumer at filing, not
-derived from the text, so a complaint entirely about Zelle can be filed under
-"Checking or savings account". Another ~30% are genuinely dual-nature (a
+derived from the text, so a complaint entirely about a payment app can be filed
+under "Checking or savings account". Another ~30% are genuinely dual-nature (a
 collections account appearing on a credit report is one event with two valid
 labels) and ~20% have the deciding evidence absent from the input entirely
 (redaction removed the brand name, or the label depends on the institution's

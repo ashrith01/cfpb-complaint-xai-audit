@@ -365,16 +365,17 @@ partial one, obtained for free.
 1. **Mislabeled ground truth (~40%)** — the CFPB product field is chosen by the
    *consumer* at filing time, not derived from the text. Repeatedly the model's
    prediction fits the narrative better than the gold label: a complaint labelled
-   `checking_savings` that is entirely about Zelle's design (p=0.990), a Coinbase
-   account takeover labelled `checking_savings`, an FCRA §605 dispute letter to
-   TransUnion labelled `debt_collection`.
+   `checking_savings` that is entirely about a peer-to-peer payment service's
+   design (p=0.990), a cryptocurrency-exchange account takeover labelled
+   `checking_savings`, an FCRA §605 dispute letter to a credit bureau labelled
+   `debt_collection`.
 2. **Genuinely dual-nature events (~30%)** — a collections account on a credit
    report is one event with two valid labels; several narratives cite FDCPA and
    FCRA in the same paragraph. This is an irreducible ceiling, and the most likely
    reason Day 3–4's fine-tune gained ≤0.003 F1 on exactly these classes.
 3. **Discriminating evidence absent from the input (~20%)** — either redaction
    removed the deciding brand token, or the label depends on the institution's
-   registration (Chime and Relay Financial are money-services businesses, so
+   registration (several consumer fintech apps are money-services businesses, so
    ordinary checking-account complaints about them are filed as money_transfer).
    Neither fact is in the text.
 4. **No product signal at all (~10%)** — generic statute citations and demand
