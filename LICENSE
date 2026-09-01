@@ -19,12 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-This licence covers the code and written analysis in this repository only.
-
-The underlying CFPB Consumer Complaint Database is a work of the United States
-federal government and is in the public domain. It is not licensed by me, and
-the CFPB — not this repository — should be cited as its source. See the
-"Data, provenance and reuse" section of README.md.
