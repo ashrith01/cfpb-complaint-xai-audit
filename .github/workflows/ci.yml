@@ -1,0 +1,90 @@
+# Fast pipeline, every push. Target: under 3 minutes wall clock (the two jobs
+# run in parallel). Proves the code runs; says nothing about model quality --
+# that is eval-gate.yml's job, against the committed full-scale artifacts.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: lint, test, smoke pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.17"
+          enable-cache: true
+          cache-dependency-glob: requirements.txt
+
+      # CPU torch: requirements.txt is locked on macOS, where torch has no CUDA
+      # dependencies; on Linux the PyPI wheel would pull ~3 GB of them.
+      - name: Install
+        run: |
+          uv venv --python 3.14 .venv
+          uv pip install --python .venv/bin/python --torch-backend cpu -r requirements.txt
+
+      - name: Lint
+        run: make lint
+
+      - name: Unit tests
+        run: make test
+
+      - name: Cache distilbert-base-uncased
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-distilbert-base-uncased
+
+      # data_prep -> train (1 epoch, 336 rows) -> registry, on the committed
+      # 560-row fixture, all under .smoke/.
+      - name: Smoke pipeline
+        run: make smoke
+
+      - name: Committed artifacts untouched
+        run: git diff --exit-code -- data results
+
+  docker:
+    name: docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # The real image bakes the registry export; CI has no registry, so the
+      # model directory is a stub. What this proves is that the Dockerfile
+      # builds and the slim runtime can import everything serving needs.
+      - name: Stub model directory
+        run: mkdir -p build/model && touch build/model/.stub
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: cfpb-classifier:ci
+          build-args: GIT_SHA=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Runtime imports resolve
+        run: docker run --rm cfpb-classifier:ci python -c "import src.serve; print('serving imports ok')"
+
+      - name: Image size
+        run: docker image ls cfpb-classifier:ci --format '{{.Repository}}:{{.Tag}} {{.Size}}'

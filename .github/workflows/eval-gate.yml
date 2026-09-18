@@ -1,0 +1,60 @@
+# Regression gate, every PR to main. Gates on the committed artifacts -- never
+# retrains -- and fails the PR if macro-F1, the faithfulness ordering, the
+# random-token control, or the pinned split regresses. See src/gate.py.
+name: eval-gate
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.17"
+          enable-cache: true
+          cache-dependency-glob: requirements.txt
+
+      # The gate needs no torch: pandas, pyarrow and sklearn, pinned via -c to
+      # the same versions as the research lock.
+      - name: Install
+        run: |
+          uv venv --python 3.14 .venv
+          uv pip install --python .venv/bin/python -c requirements.txt pandas pyarrow scikit-learn
+
+      - name: Base branch metrics
+        run: git show "origin/${{ github.base_ref }}:results/metrics.json" > base_metrics.json
+
+      - name: Run gate
+        id: gate
+        continue-on-error: true
+        run: .venv/bin/python -m src.gate --json gate.json --markdown gate.md --base-metrics base_metrics.json
+
+      - name: Job summary
+        if: always()
+        run: cat gate.md >> "$GITHUB_STEP_SUMMARY"
+
+      # One comment per PR, updated in place on every push.
+      - name: Comment on PR
+        if: always() && github.event.pull_request.head.repo.full_name == github.repository
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: eval-gate
+          path: gate.md
+
+      - name: Fail if the gate failed
+        if: steps.gate.outcome != 'success'
+        run: |
+          echo "::error::eval gate failed -- see the PR comment or job summary"
+          exit 1
