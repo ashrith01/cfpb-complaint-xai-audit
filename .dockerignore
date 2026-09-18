@@ -1,0 +1,8 @@
+# Allowlist, not denylist: the build context is only what the image needs.
+# Excludes data/, .venv/, results/ (incl. the 268 MB training checkpoint --
+# the image gets the registry export in build/model/ instead), mlruns/, .git/.
+*
+!requirements-serve.txt
+!src/
+!build/model/
+**/__pycache__

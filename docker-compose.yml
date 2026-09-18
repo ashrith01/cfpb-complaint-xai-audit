@@ -1,0 +1,31 @@
+# Two services, both local:
+#   api     the serving image built by `make docker-build`
+#   mlflow  the tracking UI over the local SQLite store (read-mostly; no training
+#           happens in a container)
+#
+# `make docker-build` must run first: it exports @production into build/model/.
+#
+# The tracking store is mounted at the SAME absolute path it has on the host.
+# MLflow records artifact locations as absolute file:// URIs, so mounting it
+# anywhere else leaves the UI unable to open a single artifact.
+
+services:
+  api:
+    image: cfpb-classifier:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.16.1
+    command: >
+      mlflow ui
+      --backend-store-uri sqlite:///${PWD}/mlflow.db
+      --host 0.0.0.0 --port 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${PWD}/mlflow.db:${PWD}/mlflow.db
+      - ${PWD}/mlruns:${PWD}/mlruns

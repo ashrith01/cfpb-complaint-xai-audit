@@ -1,0 +1,8 @@
+# Serving image only: what src/serve.py imports at runtime, nothing for training,
+# tracking or the audit. Pinned to the same versions as requirements.txt via -c.
+torch
+transformers
+captum
+fastapi
+uvicorn
+pandas

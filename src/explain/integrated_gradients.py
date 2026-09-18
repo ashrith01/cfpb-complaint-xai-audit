@@ -25,9 +25,7 @@ import time
 import torch
 from captum.attr import LayerIntegratedGradients
 
-from src.evaluate import load_model
 from src.explain.common import baseline_ids, encode, save_attributions
-from src.explain.example_set import build_example_set
 
 METHOD = "integrated_gradients"
 # 50 steps costs ~1.31 s/example here vs 0.73 s at 20. The convergence delta
@@ -43,8 +41,19 @@ def _forward(model):
     return fn
 
 
-def explain(model, tokenizer, text: str, max_len: int = 256, target: int | None = None):
-    """Return per-token attribution scores via Integrated Gradients."""
+def explain(
+    model,
+    tokenizer,
+    text: str,
+    max_len: int = 256,
+    target: int | None = None,
+    n_steps: int = N_STEPS,
+):
+    """Return per-token attribution scores via Integrated Gradients.
+
+    Also imported by src/serve.py for /explain, which is why the training and
+    example-set imports live inside main() rather than at module level.
+    """
     device = next(model.parameters()).device
     enc = encode(tokenizer, text, max_len)
     ids = enc["input_ids"].to(device)
@@ -60,7 +69,7 @@ def explain(model, tokenizer, text: str, max_len: int = 256, target: int | None 
         baselines=baseline_ids(tokenizer, ids).to(device),
         additional_forward_args=(mask,),
         target=target,
-        n_steps=N_STEPS,
+        n_steps=n_steps,
         internal_batch_size=INTERNAL_BATCH,
         return_convergence_delta=True,
     )
@@ -76,6 +85,9 @@ def explain(model, tokenizer, text: str, max_len: int = 256, target: int | None 
 
 def main():
     """Entry point for the `explain` step of `make explain` (IG portion)."""
+    from src.evaluate import load_model
+    from src.explain.example_set import build_example_set
+
     model, tokenizer, cfg = load_model()
     model.eval()
     examples = build_example_set()
