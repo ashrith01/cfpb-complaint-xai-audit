@@ -11,3 +11,10 @@ results/explanations/*.partial.json
 results/model/
 *.ipynb_checkpoints
 .env
+# MLOps: local tracking store, build context, smoke runs, request logs
+mlflow.db
+mlruns/
+build/
+.smoke/
+logs/
+data/raw/complaints_current.csv.zip

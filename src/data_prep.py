@@ -33,6 +33,8 @@ from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from src.utils import LABEL_MAP_PATH, PROCESSED_DIR, ROOT, SMOKE, SPLITS_PATH, WORK_ROOT
+
 CATEGORIES: list[str] = [
     "Credit reporting or other personal consumer reports",
     "Debt collection",
@@ -60,6 +62,8 @@ SHORT_LABELS: dict[str, str] = {
 SEED = 42
 DATE_MIN = "2024-01-01"  # freezes the product taxonomy to one revision (see module docstring)
 PER_CLASS = 4_500  # 8 x 4,500 = 36,000, inside the BRD's 30-40k band
+if SMOKE:
+    PER_CLASS = 60  # 480 rows from the 560-row CI fixture
 POOL_PER_CLASS = 40_000  # reservoir size per class; bounds memory during the 12 GB scan
 MIN_CHARS = 100  # post-cleaning length floor; drops stubs
 SPLIT = (0.70, 0.15, 0.15)
@@ -67,12 +71,11 @@ CHUNKSIZE = 200_000
 
 BULK_URL = "https://files.consumerfinance.gov/ccdb/complaints.csv.zip"
 
-ROOT = Path(__file__).resolve().parent.parent
-RAW_DIR = ROOT / "data" / "raw"
-PROCESSED_DIR = ROOT / "data" / "processed"
+RAW_DIR = WORK_ROOT / "data" / "raw"
 ZIP_PATH = RAW_DIR / "complaints.csv.zip"
-SPLITS_PATH = ROOT / "data" / "splits.json"
-LABEL_MAP_PATH = PROCESSED_DIR / "label_map.json"
+if SMOKE:
+    # Same archive layout as the bulk file, so the real scan/clean/dedupe path runs.
+    ZIP_PATH = ROOT / "tests" / "fixtures" / "complaints_sample.csv.zip"
 SOURCE_PATH = RAW_DIR / "SOURCE.txt"
 
 COL_DATE = "Date received"

@@ -9,14 +9,24 @@ rather than overwrite, or the last step to run silently erases the others.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = ROOT / "data" / "processed"
-RESULTS_DIR = ROOT / "results"
+
+# CFPB_SMOKE=1 redirects every read and write under .smoke/ and shrinks the data
+# and training grid, so CI can run the real pipeline code end to end on a small
+# committed fixture without touching the pinned split or the published results.
+SMOKE = os.environ.get("CFPB_SMOKE") == "1"
+WORK_ROOT = ROOT / ".smoke" if SMOKE else ROOT
+
+PROCESSED_DIR = WORK_ROOT / "data" / "processed"
+SPLITS_PATH = WORK_ROOT / "data" / "splits.json"
+RESULTS_DIR = WORK_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 METRICS_PATH = RESULTS_DIR / "metrics.json"
 LABEL_MAP_PATH = PROCESSED_DIR / "label_map.json"
@@ -50,3 +60,18 @@ def update_metrics(section: str, payload: dict) -> None:
         metrics = json.loads(METRICS_PATH.read_text())
     metrics[section] = payload
     METRICS_PATH.write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n")
+
+
+def dataset_hash(path: Path = SPLITS_PATH) -> str:
+    """sha256 over the pinned split IDs, in split order.
+
+    Hashes the ID lists rather than the file bytes, so reformatting splits.json
+    does not change the hash but reordering or swapping a single ID does. Order
+    is included deliberately: it determines DataLoader batching (see data_prep).
+    """
+    splits = json.loads(Path(path).read_text())
+    canonical = json.dumps(
+        {k: [int(i) for i in splits[k]] for k in ("train", "val", "test")},
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode()).hexdigest()

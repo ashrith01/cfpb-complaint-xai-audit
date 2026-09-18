@@ -16,6 +16,7 @@ import json
 import random
 import time
 
+import mlflow
 import numpy as np
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -24,9 +25,11 @@ from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from torch.utils.data import DataLoader, TensorDataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from src import tracking
 from src.utils import (
     FIGURES_DIR,
     RESULTS_DIR,
+    SMOKE,
     load_label_map,
     load_split,
     update_metrics,
@@ -44,6 +47,9 @@ CONFIG_GRID = [
     {"lr": 2e-5, "epochs": 3, "max_len": 256, "batch_size": 16},
     {"lr": 5e-5, "epochs": 3, "max_len": 128, "batch_size": 32},
 ]
+if SMOKE:
+    # CI: one short config -- proves the loop runs end to end, not that it learns.
+    CONFIG_GRID = [{"lr": 5e-5, "epochs": 1, "max_len": 64, "batch_size": 16}]
 
 # Deliberately untuned. This is the floor the fine-tune has to clear, so tuning
 # it would be tuning the goalpost -- a stronger baseline is only worth building
@@ -101,6 +107,11 @@ def run_baseline():
         "test": test,
     }
     update_metrics("baseline", payload)
+    if mlflow.active_run():
+        mlflow.log_params(payload["config"])
+        mlflow.log_metrics({"fit_seconds": elapsed, "n_features": payload["n_features"]})
+        tracking.log_scores("val", val)
+        tracking.log_scores("test", test)
 
     print(
         f"\nBaseline: TF-IDF({cfg['ngram_range'][0]}-{cfg['ngram_range'][1]}gram, "
@@ -233,6 +244,9 @@ def fine_tune(config: dict):
             f"{running / len(train_loader):.4f}  val_acc {metrics['accuracy']:.4f}"
             f"  val_macro_f1 {metrics['macro_f1']:.4f}  [{time.time() - t0:.0f}s]"
         )
+        if mlflow.active_run():
+            mlflow.log_metric("train_loss", running / len(train_loader), step=epoch)
+            tracking.log_scores("val", metrics, step=epoch)
 
         # Keep the best epoch, not the last -- 3 epochs on 25k examples can
         # overfit, and selecting the last epoch would silently ship a worse model.
@@ -304,17 +318,35 @@ def _plot_confusion(cm, names) -> None:
 
 
 def main():
-    """Entry point for `make train`: baseline, then the fine-tune grid, then test."""
-    baseline = run_baseline()
+    """Entry point for `make train`: baseline, then the fine-tune grid, then test.
+
+    Every run is logged to MLflow (see src/tracking.py) with git SHA and dataset
+    hash. The winner is logged as a model and registered, but not promoted:
+    moving the `production` alias is a separate, deliberate step (`make promote`).
+    """
+    tracking.setup()
+    lineage = tracking.lineage_tags()
+
+    with mlflow.start_run(run_name="baseline-tfidf-logreg", tags=lineage):
+        mlflow.set_tag("model_family", "tfidf+logreg")
+        baseline = run_baseline()
 
     print(f"\n{'=' * 70}\nFine-tuning {MODEL_NAME} on {_device().type}\n{'=' * 70}")
-    results = []
+    results, run_ids = [], []
     best_model = best_tokenizer = None
     for i, config in enumerate(CONFIG_GRID, 1):
         print(f"\n[{i}/{len(CONFIG_GRID)}] {config}")
         # Compare against the best *previous* config, before appending this one.
         prev_best = max((r["val"]["macro_f1"] for r in results), default=-1.0)
-        model, tokenizer, val_metrics = fine_tune(config)
+        name = f"distilbert-lr{config['lr']:g}-len{config['max_len']}"
+        with mlflow.start_run(run_name=name, tags=lineage) as run:
+            mlflow.set_tags({"model_family": "distilbert", "grid_index": i - 1})
+            mlflow.log_params({**config, "base_model": MODEL_NAME, "seed": SEED})
+            model, tokenizer, val_metrics = fine_tune(config)
+            mlflow.log_metrics(
+                {"best_epoch": val_metrics["epoch"], "train_seconds": val_metrics["train_seconds"]}
+            )
+        run_ids.append(run.info.run_id)
         results.append({"config": config, "val": val_metrics})
         if val_metrics["macro_f1"] > prev_best:
             best_model, best_tokenizer = model, tokenizer
@@ -336,6 +368,14 @@ def main():
     best_model.save_pretrained(MODEL_DIR)
     best_tokenizer.save_pretrained(MODEL_DIR)
     (MODEL_DIR / "train_config.json").write_text(json.dumps(config, indent=2) + "\n")
+
+    from src import registry  # deferred: registry imports this module
+
+    with mlflow.start_run(run_id=run_ids[winner]):
+        mlflow.set_tag("selected", "true")
+        tracking.log_scores("test", test_metrics)
+        mlflow.log_artifact(str(FIGURES_DIR / "confusion_matrix.png"), "figures")
+        version = registry.log_and_register(MODEL_DIR)
 
     update_metrics(
         "finetune",
@@ -365,6 +405,7 @@ def main():
     for name, f in sorted(test_metrics["per_class_f1"].items(), key=lambda kv: kv[1]):
         print(f"    {name:<20} {f:.4f}")
     print(f"\n  model      -> {MODEL_DIR}")
+    print(f"  registry   -> {tracking.REGISTERED_MODEL} v{version} (promote with `make promote`)")
     print(f"  confusion  -> {FIGURES_DIR / 'confusion_matrix.png'}")
 
 
