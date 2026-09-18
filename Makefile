@@ -81,25 +81,27 @@ registry:
 	$(PY) -m src.registry show
 
 mlflow-ui:
-	$(PY) -m mlflow ui --backend-store-uri sqlite:///$(CURDIR)/mlflow.db --port 5000
+	$(PY) -m mlflow ui --backend-store-uri sqlite:///$(CURDIR)/mlflow.db --port 5001
 
 export:
 	$(PY) -m src.registry export --dest build/model
 
 # Host serving, model resolved from the registry by alias.
 serve:
-	$(PY) -m uvicorn src.serve:app --port 8000
+	$(PY) -m uvicorn src.serve:app --port 8081
 
+# Against the container started by `make docker-run`.
 bench:
-	$(PY) -m src.loadtest --url http://127.0.0.1:8000
+	$(PY) -m src.loadtest --url http://127.0.0.1:8080
+	$(PY) -m src.loadtest --cold-start-image $(IMAGE):latest
 
 docker-build: export
 	docker build --build-arg GIT_SHA=$(GIT_SHA) -t $(IMAGE):$(GIT_SHA) -t $(IMAGE):latest .
 
 docker-run:
 	docker compose up -d
-	@echo "api    -> http://127.0.0.1:8000/docs"
-	@echo "mlflow -> http://127.0.0.1:5000"
+	@echo "api    -> http://127.0.0.1:8080/docs"
+	@echo "mlflow -> http://127.0.0.1:5001"
 
 docker-stop:
 	docker compose down

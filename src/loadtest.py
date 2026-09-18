@@ -1,7 +1,7 @@
 """
 Latency and throughput benchmark for the serving API.
 
-    python -m src.loadtest --url http://127.0.0.1:8000
+    python -m src.loadtest --url http://127.0.0.1:8080
     python -m src.loadtest --cold-start-image cfpb-classifier:latest
 
 For each endpoint and each concurrency level (1, 4, 16), a fixed number of
@@ -67,6 +67,8 @@ async def _run(url: str, endpoint: str, texts: list[str], concurrency: int, n: i
         await asyncio.gather(*(worker(client) for _ in range(concurrency)))
         wall = time.perf_counter() - t0
 
+    if not latencies:
+        raise RuntimeError(f"all {n} requests to {url}{endpoint} failed -- is the right server up?")
     lat = np.array(latencies)
     return {
         "concurrency": concurrency,
@@ -100,7 +102,7 @@ async def benchmark(url: str, n_predict: int, n_explain: int, n_steps: int) -> d
     return out
 
 
-def cold_start(image: str, port: int = 8001, timeout: float = 180) -> dict:
+def cold_start(image: str, port: int = 8090, timeout: float = 180) -> dict:
     """Seconds from `docker run` to the first successful /predict."""
     text = _texts(1)[0]
     payload = json.dumps({"narrative": text}).encode()
@@ -142,7 +144,7 @@ def _image_size(image: str) -> str:
 
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="python -m src.loadtest")
-    ap.add_argument("--url", default="http://127.0.0.1:8000")
+    ap.add_argument("--url", default="http://127.0.0.1:8080")
     ap.add_argument("--predict-requests", type=int, default=200)
     ap.add_argument("--explain-requests", type=int, default=16)
     ap.add_argument("--n-steps", type=int, default=50)

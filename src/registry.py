@@ -158,6 +158,10 @@ def export(dest: Path, alias: str = tracking.PRODUCTION_ALIAS) -> dict:
             shutil.rmtree(dest)
         shutil.copytree(hf_checkpoint_dir(local), dest)
     shutil.copy(LABEL_MAP_PATH, dest / "label_map.json")
+    # The checkpoint is written 0600 by save_pretrained; the image runs as a
+    # non-root user that must be able to read (not write) it.
+    for f in dest.iterdir():
+        f.chmod(0o644)
     (dest / EXPORT_META).write_text(json.dumps(info, indent=2) + "\n")
     return info
 

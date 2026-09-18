@@ -1,0 +1,91 @@
+{
+  "cold_start": {
+    "image": "cfpb-classifier:latest",
+    "image_size": "0.62 GB",
+    "runs_s": [
+      2.6,
+      2.17,
+      2.17
+    ],
+    "median_s": 2.17
+  },
+  "container": {
+    "url": "http://127.0.0.1:8080",
+    "health": {
+      "status": "ok",
+      "model_name": "cfpb-complaint-classifier",
+      "model_version": "1",
+      "registry_alias": "production",
+      "model_git_sha": "46a4211cbe1c3f8488322c1362afe3f0806a9f9c",
+      "dataset_hash": "ff1658e9291a9bbb533e3a659d3ded76e9e2dceed8b932fb856a1c90b1c3b75d",
+      "serving_git_sha": "e39370e",
+      "device": "cpu",
+      "load_seconds": 0.188
+    },
+    "predict": [
+      {
+        "concurrency": 1,
+        "requests": 200,
+        "errors": 0,
+        "p50_ms": 77.1,
+        "p95_ms": 98.5,
+        "p99_ms": 107.2,
+        "mean_ms": 75.4,
+        "qps": 13.26
+      },
+      {
+        "concurrency": 4,
+        "requests": 200,
+        "errors": 0,
+        "p50_ms": 237.3,
+        "p95_ms": 304.7,
+        "p99_ms": 361.6,
+        "mean_ms": 239.8,
+        "qps": 16.56
+      },
+      {
+        "concurrency": 16,
+        "requests": 200,
+        "errors": 0,
+        "p50_ms": 982.5,
+        "p95_ms": 1252.5,
+        "p99_ms": 1374.1,
+        "mean_ms": 953.8,
+        "qps": 16.12
+      }
+    ],
+    "explain": [
+      {
+        "concurrency": 1,
+        "requests": 16,
+        "errors": 0,
+        "p50_ms": 8237.6,
+        "p95_ms": 11769.3,
+        "p99_ms": 12014.3,
+        "mean_ms": 8623.1,
+        "qps": 0.12
+      },
+      {
+        "concurrency": 4,
+        "requests": 16,
+        "errors": 0,
+        "p50_ms": 33387.0,
+        "p95_ms": 35517.8,
+        "p99_ms": 35807.1,
+        "mean_ms": 30571.7,
+        "qps": 0.12
+      },
+      {
+        "concurrency": 16,
+        "requests": 16,
+        "errors": 0,
+        "p50_ms": 72216.9,
+        "p95_ms": 128779.9,
+        "p99_ms": 133368.2,
+        "mean_ms": 72450.9,
+        "qps": 0.12
+      }
+    ],
+    "explain_n_steps": 50
+  }
+}
