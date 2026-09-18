@@ -70,9 +70,9 @@ def build_example_set(force: bool = False) -> pd.DataFrame:
             # Spread evenly across true classes inside the stratum so no single
             # class dominates, then top up at random if a class is short.
             per_class = target // len(id2label)
-            picked = (
-                pool.groupby("label", group_keys=False)
-                .apply(lambda g: g.sample(n=min(per_class, len(g)), random_state=SEED))
+            picked = pool.groupby("label", group_keys=False).apply(
+                # noqa below: the lambda runs immediately, inside the loop.
+                lambda g: g.sample(n=min(per_class, len(g)), random_state=SEED)  # noqa: B023
             )
             short_by = target - len(picked)
             if short_by > 0:
@@ -85,16 +85,23 @@ def build_example_set(force: bool = False) -> pd.DataFrame:
         picked = picked.assign(weight=len(pool) / len(picked))
         chunks.append(picked)
 
-    out = (
-        pd.concat(chunks)
-        .sample(frac=1.0, random_state=SEED)
-        .reset_index(drop=True)
-    )
+    out = pd.concat(chunks).sample(frac=1.0, random_state=SEED).reset_index(drop=True)
     out["true_label"] = out["product"].map(short)
     out["pred_label"] = out["pred"].map(lambda i: short[id2label[i]])
 
-    cols = ["complaint_id", "narrative", "label", "product", "true_label",
-            "pred", "pred_label", "confidence", "correct", "stratum", "weight"]
+    cols = [
+        "complaint_id",
+        "narrative",
+        "label",
+        "product",
+        "true_label",
+        "pred",
+        "pred_label",
+        "confidence",
+        "correct",
+        "stratum",
+        "weight",
+    ]
     out = out[cols]
 
     EXAMPLE_SET_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -108,13 +115,20 @@ def main():
     print(f"\n{'stratum':<20} {'n':>4} {'weight':>7}")
     for s, g in df.groupby("stratum"):
         print(f"{s:<20} {len(g):>4} {g['weight'].iloc[0]:>7.2f}")
-    print(f"\nerrors: {(~df['correct']).sum()} / {len(df)} "
-          f"({(~df['correct']).mean():.0%}, vs 15% in the test set)")
+    print(
+        f"\nerrors: {(~df['correct']).sum()} / {len(df)} "
+        f"({(~df['correct']).mean():.0%}, vs 15% in the test set)"
+    )
     print(f"\ntrue-class coverage:\n{df['true_label'].value_counts().to_string()}")
     print("\ntop true->pred pairs among the sampled errors:")
     err = df[~df["correct"]]
-    print(err.groupby(["true_label", "pred_label"]).size()
-          .sort_values(ascending=False).head(6).to_string())
+    print(
+        err.groupby(["true_label", "pred_label"])
+        .size()
+        .sort_values(ascending=False)
+        .head(6)
+        .to_string()
+    )
 
 
 if __name__ == "__main__":

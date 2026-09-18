@@ -16,7 +16,6 @@ Contract:
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -47,9 +46,7 @@ def load_model(attn_implementation: str | None = None):
     config = json.loads((MODEL_DIR / "train_config.json").read_text())
     tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
     kwargs = {"attn_implementation": attn_implementation} if attn_implementation else {}
-    model = AutoModelForSequenceClassification.from_pretrained(
-        MODEL_DIR, **kwargs
-    ).to(_device())
+    model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR, **kwargs).to(_device())
     return model, tokenizer, config
 
 
@@ -68,9 +65,7 @@ def predict_test(force: bool = False) -> pd.DataFrame:
     model.eval()
     probs = []
     for input_ids, mask, _ in loader:
-        logits = model(
-            input_ids=input_ids.to(device), attention_mask=mask.to(device)
-        ).logits
+        logits = model(input_ids=input_ids.to(device), attention_mask=mask.to(device)).logits
         probs.append(torch.softmax(logits, dim=-1).cpu().numpy())
     probs = np.concatenate(probs)
 
@@ -91,10 +86,7 @@ def predict_test(force: bool = False) -> pd.DataFrame:
 def top_confused_pairs(cm: np.ndarray, k: int = N_PAIRS) -> list[tuple[int, int, int]]:
     """(true, pred, count) for the k largest off-diagonal cells."""
     pairs = [
-        (i, j, int(cm[i, j]))
-        for i in range(cm.shape[0])
-        for j in range(cm.shape[1])
-        if i != j
+        (i, j, int(cm[i, j])) for i in range(cm.shape[0]) for j in range(cm.shape[1]) if i != j
     ]
     return sorted(pairs, key=lambda p: -p[2])[:k]
 
@@ -110,21 +102,23 @@ def sample_errors(preds: pd.DataFrame, pairs, id2label, short, n: int = N_PER_PA
     for true_i, pred_j, count in pairs:
         subset = preds[(preds["label"] == true_i) & (preds["pred"] == pred_j)]
         subset = subset.sort_values("confidence", ascending=False).head(n)
-        out.append({
-            "true": short[id2label[true_i]],
-            "pred": short[id2label[pred_j]],
-            "count": count,
-            "rate": round(count / int((preds["label"] == true_i).sum()), 4),
-            "examples": [
-                {
-                    "complaint_id": int(r.complaint_id),
-                    "confidence": round(float(r.confidence), 4),
-                    "narrative": r.narrative[:SNIPPET_CHARS],
-                    "truncated": len(r.narrative) > SNIPPET_CHARS,
-                }
-                for r in subset.itertuples()
-            ],
-        })
+        out.append(
+            {
+                "true": short[id2label[true_i]],
+                "pred": short[id2label[pred_j]],
+                "count": count,
+                "rate": round(count / int((preds["label"] == true_i).sum()), 4),
+                "examples": [
+                    {
+                        "complaint_id": int(r.complaint_id),
+                        "confidence": round(float(r.confidence), 4),
+                        "narrative": r.narrative[:SNIPPET_CHARS],
+                        "truncated": len(r.narrative) > SNIPPET_CHARS,
+                    }
+                    for r in subset.itertuples()
+                ],
+            }
+        )
     return out
 
 
@@ -184,19 +178,23 @@ def main():
     ERROR_EXAMPLES_PATH.write_text(json.dumps(report, indent=2) + "\n")
 
     n_wrong = int((~preds["correct"]).sum())
-    print(f"test set: {len(preds):,} examples, {n_wrong:,} misclassified "
-          f"({n_wrong / len(preds):.1%})")
+    print(
+        f"test set: {len(preds):,} examples, {n_wrong:,} misclassified ({n_wrong / len(preds):.1%})"
+    )
     print(f"\nconfidence on correct   {preds.loc[preds['correct'], 'confidence'].mean():.4f}")
     print(f"confidence on incorrect {preds.loc[~preds['correct'], 'confidence'].mean():.4f}")
 
     hi_conf_wrong = preds[(~preds["correct"]) & (preds["confidence"] > 0.9)]
-    print(f"\nconfidently wrong (p>0.9): {len(hi_conf_wrong):,} "
-          f"({len(hi_conf_wrong) / n_wrong:.1%} of all errors)")
+    print(
+        f"\nconfidently wrong (p>0.9): {len(hi_conf_wrong):,} "
+        f"({len(hi_conf_wrong) / n_wrong:.1%} of all errors)"
+    )
 
     print(f"\nTop {len(pairs)} confused pairs:")
     for p in report:
-        print(f"  {p['true']:<18} -> {p['pred']:<18} {p['count']:>4} "
-              f"({p['rate']:.1%} of true class)")
+        print(
+            f"  {p['true']:<18} -> {p['pred']:<18} {p['count']:>4} ({p['rate']:.1%} of true class)"
+        )
 
     shortcut = shortcut_audit(preds)
     print("\nLexical-shortcut audit (money-service terms):")
@@ -205,18 +203,25 @@ def main():
         for name, v in cells.items():
             print(f"    {name:<22} n={v['n']:>4}  accuracy={v['accuracy']:.3f}")
 
-    update_metrics("error_analysis", {
-        "n_test": int(len(preds)),
-        "n_misclassified": n_wrong,
-        "error_rate": round(n_wrong / len(preds), 4),
-        "mean_confidence_correct": round(float(preds.loc[preds["correct"], "confidence"].mean()), 4),
-        "mean_confidence_incorrect": round(float(preds.loc[~preds["correct"], "confidence"].mean()), 4),
-        "n_confidently_wrong_p90": int(len(hi_conf_wrong)),
-        "top_confused_pairs": [
-            {k: p[k] for k in ("true", "pred", "count", "rate")} for p in report
-        ],
-        "lexical_shortcut": shortcut,
-    })
+    update_metrics(
+        "error_analysis",
+        {
+            "n_test": int(len(preds)),
+            "n_misclassified": n_wrong,
+            "error_rate": round(n_wrong / len(preds), 4),
+            "mean_confidence_correct": round(
+                float(preds.loc[preds["correct"], "confidence"].mean()), 4
+            ),
+            "mean_confidence_incorrect": round(
+                float(preds.loc[~preds["correct"], "confidence"].mean()), 4
+            ),
+            "n_confidently_wrong_p90": int(len(hi_conf_wrong)),
+            "top_confused_pairs": [
+                {k: p[k] for k in ("true", "pred", "count", "rate")} for p in report
+            ],
+            "lexical_shortcut": shortcut,
+        },
+    )
 
     print(f"\nwrote {ERROR_EXAMPLES_PATH}")
     print(f"wrote {PREDICTIONS_PATH}")

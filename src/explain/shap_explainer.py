@@ -61,7 +61,7 @@ def _predict_fn(model, tokenizer, max_len: int):
         texts = [str(t) for t in texts]
         for i in range(0, len(texts), BATCH_SIZE):
             enc = tokenizer(
-                texts[i:i + BATCH_SIZE],
+                texts[i : i + BATCH_SIZE],
                 truncation=True,
                 padding="max_length",
                 max_length=max_len,
@@ -97,13 +97,15 @@ def truncate_to_window(tokenizer, text: str, max_len: int) -> str:
     on the in-window tokens far noisier than it needed to be. It also puts SHAP
     on the same footing as IG and rollout, which only ever saw the window.
     """
-    ids = tokenizer(text, truncation=True, max_length=max_len,
-                    add_special_tokens=False)["input_ids"]
+    ids = tokenizer(text, truncation=True, max_length=max_len, add_special_tokens=False)[
+        "input_ids"
+    ]
     return tokenizer.decode(ids, skip_special_tokens=True)
 
 
-def explain(model, tokenizer, text: str, max_len: int = 256, target: int | None = None,
-            explainer=None):
+def explain(
+    model, tokenizer, text: str, max_len: int = 256, target: int | None = None, explainer=None
+):
     """Return per-token SHAP values for the predicted class."""
     if explainer is None:
         explainer = build_explainer(model, tokenizer, max_len)
@@ -111,13 +113,14 @@ def explain(model, tokenizer, text: str, max_len: int = 256, target: int | None 
         device = next(model.parameters()).device
         enc = encode(tokenizer, text, max_len)
         with torch.no_grad():
-            target = int(model(
-                input_ids=enc["input_ids"].to(device),
-                attention_mask=enc["attention_mask"].to(device),
-            ).logits.argmax(-1))
+            target = int(
+                model(
+                    input_ids=enc["input_ids"].to(device),
+                    attention_mask=enc["attention_mask"].to(device),
+                ).logits.argmax(-1)
+            )
 
-    sv = explainer([truncate_to_window(tokenizer, text, max_len)],
-                   max_evals=MAX_EVALS, silent=True)
+    sv = explainer([truncate_to_window(tokenizer, text, max_len)], max_evals=MAX_EVALS, silent=True)
     tokens = [t for t in sv.data[0]]
     values = sv.values[0][:, target]
     return list(zip(tokens, [float(v) for v in values])), target
@@ -147,32 +150,50 @@ def main():
     todo = [r for r in examples.itertuples() if int(r.complaint_id) not in done]
     t0 = time.time()
     for i, row in enumerate(todo, 1):
-        pairs, target = explain(model, tokenizer, row.narrative, cfg["max_len"],
-                                target=int(row.pred), explainer=explainer)
-        records.append({
-            "complaint_id": int(row.complaint_id),
-            "pred": int(row.pred),
-            "confidence": float(row.confidence),
-            "tokens": [t for t, _ in pairs],
-            "attributions": [round(s, 6) for _, s in pairs],
-        })
+        pairs, target = explain(
+            model,
+            tokenizer,
+            row.narrative,
+            cfg["max_len"],
+            target=int(row.pred),
+            explainer=explainer,
+        )
+        records.append(
+            {
+                "complaint_id": int(row.complaint_id),
+                "pred": int(row.pred),
+                "confidence": float(row.confidence),
+                "tokens": [t for t, _ in pairs],
+                "attributions": [round(s, 6) for _, s in pairs],
+            }
+        )
         if i % CHECKPOINT_EVERY == 0:
             partial.write_text(json.dumps(records, separators=(",", ":")))
             rate = (time.time() - t0) / i
-            print(f"\r[SHAP] {len(records)}/{len(examples)}  {rate:.2f}s/ex  "
-                  f"eta {rate * (len(todo) - i) / 60:.1f} min", end="", flush=True)
+            print(
+                f"\r[SHAP] {len(records)}/{len(examples)}  {rate:.2f}s/ex  "
+                f"eta {rate * (len(todo) - i) / 60:.1f} min",
+                end="",
+                flush=True,
+            )
     partial.write_text(json.dumps(records, separators=(",", ":")))
 
-    path = save_attributions(METHOD, {
-        "max_evals": MAX_EVALS,
-        "max_len": cfg["max_len"],
-        "target": "predicted_class",
-        "explainer": "shap.PartitionExplainer",
-        "masker": "shap.maskers.Text(tokenizer)",
-        "input": "truncated to the model's max_len window before explaining",
-    }, records)
-    print(f"\r[SHAP] {len(records)} examples in {(time.time() - t0) / 60:.1f} min"
-          f"  ({(time.time() - t0) / len(records):.2f}s/ex)")
+    path = save_attributions(
+        METHOD,
+        {
+            "max_evals": MAX_EVALS,
+            "max_len": cfg["max_len"],
+            "target": "predicted_class",
+            "explainer": "shap.PartitionExplainer",
+            "masker": "shap.maskers.Text(tokenizer)",
+            "input": "truncated to the model's max_len window before explaining",
+        },
+        records,
+    )
+    print(
+        f"\r[SHAP] {len(records)} examples in {(time.time() - t0) / 60:.1f} min"
+        f"  ({(time.time() - t0) / len(records):.2f}s/ex)"
+    )
     print(f"  wrote {path}")
 
 

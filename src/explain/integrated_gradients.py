@@ -39,6 +39,7 @@ INTERNAL_BATCH = 25
 def _forward(model):
     def fn(input_ids, attention_mask):
         return model(input_ids=input_ids, attention_mask=attention_mask).logits
+
     return fn
 
 
@@ -86,36 +87,51 @@ def main():
             model, tokenizer, row.narrative, cfg["max_len"], target=int(row.pred)
         )
         deltas.append(delta)
-        records.append({
-            "complaint_id": int(row.complaint_id),
-            "pred": int(row.pred),
-            "confidence": float(row.confidence),
-            "tokens": [t for t, _ in pairs],
-            "token_ids": enc["token_ids"],
-            "positions": enc["positions"],
-            "attributions": [round(s, 6) for _, s in pairs],
-        })
+        records.append(
+            {
+                "complaint_id": int(row.complaint_id),
+                "pred": int(row.pred),
+                "confidence": float(row.confidence),
+                "tokens": [t for t, _ in pairs],
+                "token_ids": enc["token_ids"],
+                "positions": enc["positions"],
+                "attributions": [round(s, 6) for _, s in pairs],
+            }
+        )
         if i % 25 == 0:
             rate = (time.time() - t0) / i
-            print(f"\r[IG] {i}/{len(examples)}  {rate:.2f}s/ex  "
-                  f"eta {rate * (len(examples) - i) / 60:.1f} min", end="", flush=True)
+            print(
+                f"\r[IG] {i}/{len(examples)}  {rate:.2f}s/ex  "
+                f"eta {rate * (len(examples) - i) / 60:.1f} min",
+                end="",
+                flush=True,
+            )
 
-    path = save_attributions(METHOD, {
-        "n_steps": N_STEPS,
-        "max_len": cfg["max_len"],
-        "target": "predicted_class",
-        "baseline": "pad_with_specials_preserved",
-        "layer": "distilbert.embeddings",
-    }, records)
+    path = save_attributions(
+        METHOD,
+        {
+            "n_steps": N_STEPS,
+            "max_len": cfg["max_len"],
+            "target": "predicted_class",
+            "baseline": "pad_with_specials_preserved",
+            "layer": "distilbert.embeddings",
+        },
+        records,
+    )
 
     # Convergence delta is IG's built-in self-check: completeness says the
     # attributions should sum to F(input) - F(baseline). A large delta means the
     # step count is too low and the attributions are not trustworthy.
     import statistics
-    print(f"\r[IG] {len(records)} examples in {(time.time() - t0) / 60:.1f} min"
-          f"  ({(time.time() - t0) / len(records):.2f}s/ex)")
-    print(f"  convergence delta: mean {statistics.mean(deltas):.4f}  "
-          f"median {statistics.median(deltas):.4f}  max {max(deltas):.4f}")
+
+    print(
+        f"\r[IG] {len(records)} examples in {(time.time() - t0) / 60:.1f} min"
+        f"  ({(time.time() - t0) / len(records):.2f}s/ex)"
+    )
+    print(
+        f"  convergence delta: mean {statistics.mean(deltas):.4f}  "
+        f"median {statistics.median(deltas):.4f}  max {max(deltas):.4f}"
+    )
     print(f"  wrote {path}")
 
 

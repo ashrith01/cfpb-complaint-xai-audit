@@ -83,10 +83,10 @@ def run_baseline():
     # would leave the headline "beats baseline" claim comparing two different
     # splits. Nothing is selected on test here -- the baseline config is fixed
     # and untuned -- so scoring it there costs no validity.
-    val = _score(val_df["label"], clf.predict(vec.transform(val_df["narrative"])),
-                 id2label, short)
-    test = _score(test_df["label"], clf.predict(vec.transform(test_df["narrative"])),
-                  id2label, short)
+    val = _score(val_df["label"], clf.predict(vec.transform(val_df["narrative"])), id2label, short)
+    test = _score(
+        test_df["label"], clf.predict(vec.transform(test_df["narrative"])), id2label, short
+    )
 
     payload = {
         "model": "tfidf+logreg",
@@ -102,12 +102,16 @@ def run_baseline():
     }
     update_metrics("baseline", payload)
 
-    print(f"\nBaseline: TF-IDF({cfg['ngram_range'][0]}-{cfg['ngram_range'][1]}gram, "
-          f"{x_train.shape[1]:,} features) + LogisticRegression")
+    print(
+        f"\nBaseline: TF-IDF({cfg['ngram_range'][0]}-{cfg['ngram_range'][1]}gram, "
+        f"{x_train.shape[1]:,} features) + LogisticRegression"
+    )
     print(f"  fit on {len(train_df):,} train docs in {elapsed:.1f}s")
     print(f"\n  val  accuracy {val['accuracy']:.4f}   macro-F1 {val['macro_f1']:.4f}")
-    print(f"  test accuracy {test['accuracy']:.4f}   macro-F1 {test['macro_f1']:.4f}"
-          f"   <- floor for the fine-tune to beat")
+    print(
+        f"  test accuracy {test['accuracy']:.4f}   macro-F1 {test['macro_f1']:.4f}"
+        f"   <- floor for the fine-tune to beat"
+    )
     print("\n  per-class F1 (test):")
     for name, f in sorted(test["per_class_f1"].items(), key=lambda kv: kv[1]):
         print(f"    {name:<20} {f:.4f}")
@@ -146,9 +150,7 @@ def _predict(model, loader, device) -> np.ndarray:
     model.eval()
     preds = []
     for input_ids, mask, _ in loader:
-        logits = model(
-            input_ids=input_ids.to(device), attention_mask=mask.to(device)
-        ).logits
+        logits = model(input_ids=input_ids.to(device), attention_mask=mask.to(device)).logits
         preds.append(logits.argmax(-1).cpu().numpy())
     return np.concatenate(preds)
 
@@ -158,9 +160,7 @@ def _score(y_true, y_pred, id2label, short) -> dict:
     return {
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "macro_f1": float(f1_score(y_true, y_pred, average="macro")),
-        "per_class_f1": {
-            short[id2label[i]]: float(f) for i, f in enumerate(per_class)
-        },
+        "per_class_f1": {short[id2label[i]]: float(f) for i, f in enumerate(per_class)},
     }
 
 
@@ -183,9 +183,7 @@ def fine_tune(config: dict):
     val_ds = _encode(tokenizer, val_df, config["max_len"])
     # Seeded generator so shuffling is reproducible across runs (NFR4).
     g = torch.Generator().manual_seed(SEED)
-    train_loader = DataLoader(
-        train_ds, batch_size=config["batch_size"], shuffle=True, generator=g
-    )
+    train_loader = DataLoader(train_ds, batch_size=config["batch_size"], shuffle=True, generator=g)
     val_loader = DataLoader(val_ds, batch_size=64)
 
     optim = torch.optim.AdamW(model.parameters(), lr=config["lr"], weight_decay=0.01)
@@ -193,8 +191,11 @@ def fine_tune(config: dict):
     warmup = int(0.1 * total_steps)
     sched = torch.optim.lr_scheduler.LambdaLR(
         optim,
-        lambda s: s / max(1, warmup) if s < warmup
-        else max(0.0, (total_steps - s) / max(1, total_steps - warmup)),
+        lambda s: (
+            s / max(1, warmup)
+            if s < warmup
+            else max(0.0, (total_steps - s) / max(1, total_steps - warmup))
+        ),
     )
 
     t0 = time.time()
@@ -216,15 +217,22 @@ def fine_tune(config: dict):
 
             running += out.loss.item()
             if step % 100 == 0:
-                print(f"\r  epoch {epoch}/{config['epochs']}  step {step}/"
-                      f"{len(train_loader)}  loss {running / step:.4f}"
-                      f"  [{time.time() - t0:.0f}s]", end="", flush=True)
+                print(
+                    f"\r  epoch {epoch}/{config['epochs']}  step {step}/"
+                    f"{len(train_loader)}  loss {running / step:.4f}"
+                    f"  [{time.time() - t0:.0f}s]",
+                    end="",
+                    flush=True,
+                )
 
-        metrics = _score(val_df["label"].to_numpy(),
-                         _predict(model, val_loader, device), id2label, short)
-        print(f"\r  epoch {epoch}/{config['epochs']}  train_loss "
-              f"{running / len(train_loader):.4f}  val_acc {metrics['accuracy']:.4f}"
-              f"  val_macro_f1 {metrics['macro_f1']:.4f}  [{time.time() - t0:.0f}s]")
+        metrics = _score(
+            val_df["label"].to_numpy(), _predict(model, val_loader, device), id2label, short
+        )
+        print(
+            f"\r  epoch {epoch}/{config['epochs']}  train_loss "
+            f"{running / len(train_loader):.4f}  val_acc {metrics['accuracy']:.4f}"
+            f"  val_macro_f1 {metrics['macro_f1']:.4f}  [{time.time() - t0:.0f}s]"
+        )
 
         # Keep the best epoch, not the last -- 3 epochs on 25k examples can
         # overfit, and selecting the last epoch would silently ship a worse model.
@@ -263,6 +271,7 @@ def evaluate_test(model, tokenizer, test_df, max_len: int) -> dict:
 
 def _plot_confusion(cm, names) -> None:
     import matplotlib
+
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
@@ -278,8 +287,15 @@ def _plot_confusion(cm, names) -> None:
     ax.set_title("DistilBERT — test confusion matrix (row-normalised)")
     for i in range(len(names)):
         for j in range(len(names)):
-            ax.text(j, i, f"{norm[i, j]:.2f}", ha="center", va="center",
-                    fontsize=8, color="white" if norm[i, j] > 0.5 else "black")
+            ax.text(
+                j,
+                i,
+                f"{norm[i, j]:.2f}",
+                ha="center",
+                va="center",
+                fontsize=8,
+                color="white" if norm[i, j] > 0.5 else "black",
+            )
     fig.colorbar(im, ax=ax, fraction=0.046)
     fig.tight_layout()
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
@@ -307,29 +323,33 @@ def main():
 
     winner = select_best(results)
     config = results[winner]["config"]
-    print(f"\nBest config [{winner + 1}/{len(CONFIG_GRID)}]: {config}"
-          f"  val macro-F1 {results[winner]['val']['macro_f1']:.4f}")
+    print(
+        f"\nBest config [{winner + 1}/{len(CONFIG_GRID)}]: {config}"
+        f"  val macro-F1 {results[winner]['val']['macro_f1']:.4f}"
+    )
 
     # Held-out test set is touched exactly once, with the already-selected model.
     print("\nEvaluating on held-out test set (once)...")
-    test_metrics = evaluate_test(best_model, best_tokenizer, load_split("test"),
-                                 config["max_len"])
+    test_metrics = evaluate_test(best_model, best_tokenizer, load_split("test"), config["max_len"])
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     best_model.save_pretrained(MODEL_DIR)
     best_tokenizer.save_pretrained(MODEL_DIR)
     (MODEL_DIR / "train_config.json").write_text(json.dumps(config, indent=2) + "\n")
 
-    update_metrics("finetune", {
-        "model": MODEL_NAME,
-        "seed": SEED,
-        "device": _device().type,
-        "grid": results,
-        "best_config": config,
-        "best_index": winner,
-        "val": results[winner]["val"],
-        "test": test_metrics,
-    })
+    update_metrics(
+        "finetune",
+        {
+            "model": MODEL_NAME,
+            "seed": SEED,
+            "device": _device().type,
+            "grid": results,
+            "best_config": config,
+            "best_index": winner,
+            "val": results[winner]["val"],
+            "test": test_metrics,
+        },
+    )
 
     # Like-for-like: both numbers are on the held-out test set.
     delta = test_metrics["macro_f1"] - baseline["test"]["macro_f1"]
@@ -337,8 +357,10 @@ def main():
     print(f"  test accuracy         {test_metrics['accuracy']:.4f}")
     print(f"  test macro-F1         {test_metrics['macro_f1']:.4f}")
     print(f"  baseline test macro-F1 {baseline['test']['macro_f1']:.4f}")
-    print(f"  delta                 {delta:+.4f}"
-          f"   {'BEATS baseline' if delta > 0 else 'DOES NOT beat baseline'}")
+    print(
+        f"  delta                 {delta:+.4f}"
+        f"   {'BEATS baseline' if delta > 0 else 'DOES NOT beat baseline'}"
+    )
     print("\n  per-class F1 (test):")
     for name, f in sorted(test_metrics["per_class_f1"].items(), key=lambda kv: kv[1]):
         print(f"    {name:<20} {f:.4f}")

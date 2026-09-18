@@ -86,10 +86,14 @@ def baseline_ids(tokenizer, input_ids: torch.Tensor) -> torch.Tensor:
 def save_attributions(method: str, config: dict, records: list[dict]) -> Path:
     ATTRIBUTION_DIR.mkdir(parents=True, exist_ok=True)
     path = attribution_path(method)
-    path.write_text(json.dumps(
-        {"method": method, "config": config, "n": len(records), "examples": records},
-        indent=None, separators=(",", ":"),
-    ) + "\n")
+    path.write_text(
+        json.dumps(
+            {"method": method, "config": config, "n": len(records), "examples": records},
+            indent=None,
+            separators=(",", ":"),
+        )
+        + "\n"
+    )
     return path
 
 

@@ -85,24 +85,30 @@ def main():
     t0 = time.time()
     for i, row in enumerate(examples.itertuples(), 1):
         pairs, enc, _ = explain(model, tokenizer, row.narrative, cfg["max_len"])
-        records.append({
-            "complaint_id": int(row.complaint_id),
-            "pred": int(row.pred),
-            "confidence": float(row.confidence),
-            "tokens": [t for t, _ in pairs],
-            "token_ids": enc["token_ids"],
-            "positions": enc["positions"],
-            "attributions": [round(s, 8) for _, s in pairs],
-        })
+        records.append(
+            {
+                "complaint_id": int(row.complaint_id),
+                "pred": int(row.pred),
+                "confidence": float(row.confidence),
+                "tokens": [t for t, _ in pairs],
+                "token_ids": enc["token_ids"],
+                "positions": enc["positions"],
+                "attributions": [round(s, 8) for _, s in pairs],
+            }
+        )
         if i % 50 == 0:
             print(f"\r[rollout] {i}/{len(examples)}", end="", flush=True)
 
-    path = save_attributions(METHOD, {
-        "max_len": cfg["max_len"],
-        "target": "none -- attention is not class-conditioned",
-        "residual": "identity added, rows renormalised",
-        "head_reduction": "mean",
-    }, records)
+    path = save_attributions(
+        METHOD,
+        {
+            "max_len": cfg["max_len"],
+            "target": "none -- attention is not class-conditioned",
+            "residual": "identity added, rows renormalised",
+            "head_reduction": "mean",
+        },
+        records,
+    )
     print(f"\r[rollout] {len(records)} examples in {time.time() - t0:.0f}s")
     print(f"  wrote {path}")
 

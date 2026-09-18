@@ -86,6 +86,7 @@ USECOLS = [COL_DATE, COL_PRODUCT, COL_NARRATIVE, COL_ID]
 # Download
 # --------------------------------------------------------------------------
 
+
 def download(force: bool = False) -> Path:
     """Fetch the bulk complaint archive into data/raw/, skipping if already present.
 
@@ -97,8 +98,10 @@ def download(force: bool = False) -> Path:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
 
     if ZIP_PATH.exists() and not force:
-        print(f"[download] using cached {ZIP_PATH.name} "
-              f"({ZIP_PATH.stat().st_size / 1e9:.2f} GB) -- pass force=True to refresh")
+        print(
+            f"[download] using cached {ZIP_PATH.name} "
+            f"({ZIP_PATH.stat().st_size / 1e9:.2f} GB) -- pass force=True to refresh"
+        )
         return ZIP_PATH
 
     print(f"[download] fetching {BULK_URL}")
@@ -113,15 +116,16 @@ def download(force: bool = False) -> Path:
                 done += len(chunk)
                 if total:
                     pct = 100 * done / total
-                    print(f"\r[download] {done / 1e9:.2f}/{total / 1e9:.2f} GB "
-                          f"({pct:.1f}%)", end="", flush=True)
+                    print(
+                        f"\r[download] {done / 1e9:.2f}/{total / 1e9:.2f} GB ({pct:.1f}%)",
+                        end="",
+                        flush=True,
+                    )
         print()
         tmp.replace(ZIP_PATH)
 
     SOURCE_PATH.write_text(
-        f"url: {BULK_URL}\n"
-        f"bytes: {ZIP_PATH.stat().st_size}\n"
-        f"last_modified: {last_modified}\n"
+        f"url: {BULK_URL}\nbytes: {ZIP_PATH.stat().st_size}\nlast_modified: {last_modified}\n"
     )
     return ZIP_PATH
 
@@ -205,6 +209,7 @@ def _dedupe_key(text: str) -> str:
 # Scan / filter / sample
 # --------------------------------------------------------------------------
 
+
 def load_pinned(path: Path, pinned: set[int]) -> pd.DataFrame:
     """Re-extract exactly the complaint IDs recorded in data/splits.json.
 
@@ -233,11 +238,11 @@ def load_pinned(path: Path, pinned: set[int]) -> pd.DataFrame:
                 if not cleaned:
                     continue
                 found.add(int(cid))
-                rows.append({"complaint_id": int(cid), "narrative": cleaned,
-                             "product": str(product)})
+                rows.append(
+                    {"complaint_id": int(cid), "narrative": cleaned, "product": str(product)}
+                )
             if (i + 1) % 10 == 0:
-                print(f"\r[pinned] {len(found):,}/{len(pinned):,} recovered",
-                      end="", flush=True)
+                print(f"\r[pinned] {len(found):,}/{len(pinned):,} recovered", end="", flush=True)
 
     missing = pinned - found
     print(f"\r[pinned] {len(found):,}/{len(pinned):,} recovered")
@@ -264,8 +269,7 @@ def load_and_filter(path: Path) -> tuple[pd.DataFrame, dict[str, int]]:
     member = _csv_member(path)
     rng = random.Random(SEED)
 
-    stats = dict(scanned=0, has_narrative=0, in_window=0, in_category=0,
-                 cleaned=0, deduped=0)
+    stats = dict(scanned=0, has_narrative=0, in_window=0, in_category=0, cleaned=0, deduped=0)
     seen: set[str] = set()
     pools: dict[str, list[dict]] = {c: [] for c in CATEGORIES}
     eligible: dict[str, int] = {c: 0 for c in CATEGORIES}
@@ -286,8 +290,7 @@ def load_and_filter(path: Path) -> tuple[pd.DataFrame, dict[str, int]]:
                 missing = [c for c in USECOLS if c not in chunk.columns]
                 if missing:
                     raise RuntimeError(
-                        f"bulk CSV is missing expected columns {missing}; "
-                        f"got {list(chunk.columns)}"
+                        f"bulk CSV is missing expected columns {missing}; got {list(chunk.columns)}"
                     )
 
             stats["scanned"] += len(chunk)
@@ -330,11 +333,13 @@ def load_and_filter(path: Path) -> tuple[pd.DataFrame, dict[str, int]]:
                         pool[j] = row
 
             if (i + 1) % 10 == 0:
-                print(f"\r[scan] {stats['scanned'] / 1e6:.1f}M rows read, "
-                      f"{stats['deduped']:,} kept", end="", flush=True)
+                print(
+                    f"\r[scan] {stats['scanned'] / 1e6:.1f}M rows read, {stats['deduped']:,} kept",
+                    end="",
+                    flush=True,
+                )
 
-    print(f"\r[scan] {stats['scanned'] / 1e6:.1f}M rows read, "
-          f"{stats['deduped']:,} kept")
+    print(f"\r[scan] {stats['scanned'] / 1e6:.1f}M rows read, {stats['deduped']:,} kept")
 
     df = pd.DataFrame([r for pool in pools.values() for r in pool])
     return df, {**stats, **{f"eligible::{k}": v for k, v in eligible.items()}}
@@ -342,10 +347,7 @@ def load_and_filter(path: Path) -> tuple[pd.DataFrame, dict[str, int]]:
 
 def balanced_sample(df: pd.DataFrame, seed: int = SEED) -> pd.DataFrame:
     """Take exactly PER_CLASS rows per category. Fails loudly if a class falls short."""
-    short = {
-        c: n for c in CATEGORIES
-        if (n := int((df["product"] == c).sum())) < PER_CLASS
-    }
+    short = {c: n for c in CATEGORIES if (n := int((df["product"] == c).sum())) < PER_CLASS}
     if short:
         raise RuntimeError(
             f"not enough narratives after cleaning/dedupe for {short} "
@@ -379,23 +381,26 @@ def stratified_split(df, seed: int = SEED):
     )
 
     SPLITS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SPLITS_PATH.write_text(json.dumps(
-        {
-            "seed": seed,
-            "date_min": DATE_MIN,
-            "per_class": PER_CLASS,
-            "split": list(SPLIT),
-            "categories": CATEGORIES,
-            # Recorded in split order, not sorted. The order is what determines
-            # DataLoader batching, so sorting here would make a clean clone
-            # reconstruct the same *rows* in a different order and train a
-            # different model. The split is seeded, so this is equally stable.
-            "train": [int(i) for i in train_df["complaint_id"]],
-            "val": [int(i) for i in val_df["complaint_id"]],
-            "test": [int(i) for i in test_df["complaint_id"]],
-        },
-        indent=2,
-    ) + "\n")
+    SPLITS_PATH.write_text(
+        json.dumps(
+            {
+                "seed": seed,
+                "date_min": DATE_MIN,
+                "per_class": PER_CLASS,
+                "split": list(SPLIT),
+                "categories": CATEGORIES,
+                # Recorded in split order, not sorted. The order is what determines
+                # DataLoader batching, so sorting here would make a clean clone
+                # reconstruct the same *rows* in a different order and train a
+                # different model. The split is seeded, so this is equally stable.
+                "train": [int(i) for i in train_df["complaint_id"]],
+                "val": [int(i) for i in val_df["complaint_id"]],
+                "test": [int(i) for i in test_df["complaint_id"]],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
 
     return (
         train_df.reset_index(drop=True),
@@ -408,14 +413,17 @@ def _write_label_map() -> dict[str, int]:
     """Single source of truth for label ids, consumed by train.py and every explainer."""
     label2id = {c: i for i, c in enumerate(CATEGORIES)}
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-    LABEL_MAP_PATH.write_text(json.dumps(
-        {
-            "label2id": label2id,
-            "id2label": {str(i): c for c, i in label2id.items()},
-            "short_labels": SHORT_LABELS,
-        },
-        indent=2,
-    ) + "\n")
+    LABEL_MAP_PATH.write_text(
+        json.dumps(
+            {
+                "label2id": label2id,
+                "id2label": {str(i): c for c, i in label2id.items()},
+                "short_labels": SHORT_LABELS,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     return label2id
 
 
@@ -425,22 +433,32 @@ def _report(stats: dict[str, int], splits: dict[str, pd.DataFrame]) -> None:
     print(f"  with a narrative        {stats['has_narrative']:>12,}")
     print(f"  received >= {DATE_MIN}  {stats['in_window']:>12,}")
     print(f"  in one of {len(CATEGORIES)} categories {stats['in_category']:>12,}")
-    print(f"  survived cleaning       {stats['cleaned']:>12,}"
-          f"   (-{stats['in_category'] - stats['cleaned']:,} too short)")
-    print(f"  after dedupe            {stats['deduped']:>12,}"
-          f"   (-{stats['cleaned'] - stats['deduped']:,} duplicates)")
+    print(
+        f"  survived cleaning       {stats['cleaned']:>12,}"
+        f"   (-{stats['in_category'] - stats['cleaned']:,} too short)"
+    )
+    print(
+        f"  after dedupe            {stats['deduped']:>12,}"
+        f"   (-{stats['cleaned'] - stats['deduped']:,} duplicates)"
+    )
 
     print("\nClass balance")
     width = max(len(c) for c in CATEGORIES)
-    print(f"  {'product'.ljust(width)}  {'eligible':>9}  {'train':>6}  {'val':>5}  "
-          f"{'test':>5}  {'total':>6}")
+    print(
+        f"  {'product'.ljust(width)}  {'eligible':>9}  {'train':>6}  {'val':>5}  "
+        f"{'test':>5}  {'total':>6}"
+    )
     for c in CATEGORIES:
         counts = [int((splits[s]["product"] == c).sum()) for s in ("train", "val", "test")]
-        print(f"  {c.ljust(width)}  {stats[f'eligible::{c}']:>9,}  "
-              f"{counts[0]:>6,}  {counts[1]:>5,}  {counts[2]:>5,}  {sum(counts):>6,}")
+        print(
+            f"  {c.ljust(width)}  {stats[f'eligible::{c}']:>9,}  "
+            f"{counts[0]:>6,}  {counts[1]:>5,}  {counts[2]:>5,}  {sum(counts):>6,}"
+        )
     totals = [len(splits[s]) for s in ("train", "val", "test")]
-    print(f"  {'TOTAL'.ljust(width)}  {'':>9}  {totals[0]:>6,}  {totals[1]:>5,}  "
-          f"{totals[2]:>5,}  {sum(totals):>6,}")
+    print(
+        f"  {'TOTAL'.ljust(width)}  {'':>9}  {totals[0]:>6,}  {totals[1]:>5,}  "
+        f"{totals[2]:>5,}  {sum(totals):>6,}"
+    )
 
 
 def main(resample: bool = False):
@@ -461,8 +479,10 @@ def main(resample: bool = False):
 
     if SPLITS_PATH.exists() and not resample:
         pinned = json.loads(SPLITS_PATH.read_text())
-        print(f"[pinned] reproducing the split in {SPLITS_PATH.name} "
-              f"(seed {pinned['seed']}) -- pass --resample to draw a fresh sample")
+        print(
+            f"[pinned] reproducing the split in {SPLITS_PATH.name} "
+            f"(seed {pinned['seed']}) -- pass --resample to draw a fresh sample"
+        )
         ids = {name: [int(i) for i in pinned[name]] for name in ("train", "val", "test")}
         df = load_pinned(path, {i for v in ids.values() for i in v})
         df["label"] = df["product"].map(label2id).astype("int16")

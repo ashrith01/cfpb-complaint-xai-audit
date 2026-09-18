@@ -70,10 +70,16 @@ def _probs(model, tokenizer, texts: list[str], max_len: int) -> np.ndarray:
     device = next(model.parameters()).device
     out = []
     for i in range(0, len(texts), BATCH):
-        enc = tokenizer(texts[i:i + BATCH], truncation=True, padding="max_length",
-                        max_length=max_len, return_tensors="pt")
-        logits = model(input_ids=enc["input_ids"].to(device),
-                       attention_mask=enc["attention_mask"].to(device)).logits
+        enc = tokenizer(
+            texts[i : i + BATCH],
+            truncation=True,
+            padding="max_length",
+            max_length=max_len,
+            return_tensors="pt",
+        )
+        logits = model(
+            input_ids=enc["input_ids"].to(device), attention_mask=enc["attention_mask"].to(device)
+        ).logits
         out.append(torch.softmax(logits, -1).cpu().numpy())
     return np.concatenate(out)
 
@@ -95,8 +101,15 @@ def _rebuild(tokens: list[str], keep: set[int], tokenizer) -> str:
     return " ".join(parts).strip()
 
 
-def comprehensiveness(model, tokenizer, text: str, attributions, tokens=None,
-                      max_len: int = 256, target: int | None = None) -> float:
+def comprehensiveness(
+    model,
+    tokenizer,
+    text: str,
+    attributions,
+    tokens=None,
+    max_len: int = 256,
+    target: int | None = None,
+) -> float:
     """Drop in p(predicted class) after deleting the top-k% attributed tokens."""
     p0 = _probs(model, tokenizer, [text], max_len)[0]
     target = int(p0.argmax()) if target is None else target
@@ -105,8 +118,15 @@ def comprehensiveness(model, tokenizer, text: str, attributions, tokens=None,
     return float(p0[target] - _probs(model, tokenizer, [reduced], max_len)[0][target])
 
 
-def sufficiency(model, tokenizer, text: str, attributions, tokens=None,
-                max_len: int = 256, target: int | None = None) -> float:
+def sufficiency(
+    model,
+    tokenizer,
+    text: str,
+    attributions,
+    tokens=None,
+    max_len: int = 256,
+    target: int | None = None,
+) -> float:
     """Drop in p(predicted class) when ONLY the top-k% attributed tokens are kept."""
     p0 = _probs(model, tokenizer, [text], max_len)[0]
     target = int(p0.argmax()) if target is None else target
@@ -145,17 +165,19 @@ def _score_method(model, tokenizer, records, examples, max_len, randomize=False)
     rows = []
     for j, cid in enumerate(ids):
         t = targets[j]
-        rows.append({
-            "complaint_id": cid,
-            "p0": float(p_full[j, t]),
-            "comprehensiveness": float(p_full[j, t] - p_comp[j, t]),
-            "sufficiency": float(p_full[j, t] - p_suff[j, t]),
-            "pred_held_comp": bool(p_comp[j].argmax() == t),
-            "pred_held_suff": bool(p_suff[j].argmax() == t),
-            "stratum": by_id[cid].stratum,
-            "weight": float(by_id[cid].weight),
-            "correct": bool(by_id[cid].correct),
-        })
+        rows.append(
+            {
+                "complaint_id": cid,
+                "p0": float(p_full[j, t]),
+                "comprehensiveness": float(p_full[j, t] - p_comp[j, t]),
+                "sufficiency": float(p_full[j, t] - p_suff[j, t]),
+                "pred_held_comp": bool(p_comp[j].argmax() == t),
+                "pred_held_suff": bool(p_suff[j].argmax() == t),
+                "stratum": by_id[cid].stratum,
+                "weight": float(by_id[cid].weight),
+                "correct": bool(by_id[cid].correct),
+            }
+        )
     return rows
 
 
@@ -174,9 +196,11 @@ def _aggregate(rows) -> dict:
         "sufficiency_median": round(float(np.median(suff)), 4),
         "sufficiency_weighted": round(float((suff * w).sum() / w.sum()), 4),
         "pred_flipped_after_removal": round(
-            float(np.mean([not r["pred_held_comp"] for r in rows])), 4),
+            float(np.mean([not r["pred_held_comp"] for r in rows])), 4
+        ),
         "pred_held_on_rationale_only": round(
-            float(np.mean([r["pred_held_suff"] for r in rows])), 4),
+            float(np.mean([r["pred_held_suff"] for r in rows])), 4
+        ),
     }
 
 
@@ -187,9 +211,9 @@ def _by_stratum(rows) -> dict:
         out[s] = {
             "n": len(sub),
             "comprehensiveness_mean": round(
-                float(np.mean([r["comprehensiveness"] for r in sub])), 4),
-            "sufficiency_mean": round(
-                float(np.mean([r["sufficiency"] for r in sub])), 4),
+                float(np.mean([r["comprehensiveness"] for r in sub])), 4
+            ),
+            "sufficiency_mean": round(float(np.mean([r["sufficiency"] for r in sub])), 4),
         }
     return out
 
@@ -210,26 +234,34 @@ def score_all_methods():
         print(f"[{method}] scored {len(rows)}")
 
     # Control: the same pipeline with attribution scores replaced by noise.
-    rows = _score_method(model, tokenizer, load_attributions(METHODS[0])["examples"],
-                         examples, max_len, randomize=True)
+    rows = _score_method(
+        model,
+        tokenizer,
+        load_attributions(METHODS[0])["examples"],
+        examples,
+        max_len,
+        randomize=True,
+    )
     results["random"] = {**_aggregate(rows), "by_stratum": _by_stratum(rows)}
     per_example["random"] = rows
     print("[random] scored", len(rows))
 
     update_metrics("faithfulness", {"top_k_pct": TOP_K_PCT, "methods": results})
     (RESULTS_DIR / "faithfulness_per_example.json").write_text(
-        json.dumps(per_example, separators=(",", ":")) + "\n")
+        json.dumps(per_example, separators=(",", ":")) + "\n"
+    )
 
     order = list(METHODS) + ["random"]
     print(f"\ntop-k = {TOP_K_PCT:.0%} (committed before scoring)\n")
-    print(f"{'method':<22} {'comp↑':>7} {'suff↓':>7} {'comp_wt':>8} "
-          f"{'flip%':>7} {'held%':>7}")
+    print(f"{'method':<22} {'comp↑':>7} {'suff↓':>7} {'comp_wt':>8} {'flip%':>7} {'held%':>7}")
     for m in order:
         r = results[m]
-        print(f"{m:<22} {r['comprehensiveness_mean']:>7.4f} "
-              f"{r['sufficiency_mean']:>7.4f} {r['comprehensiveness_weighted']:>8.4f} "
-              f"{r['pred_flipped_after_removal']:>7.1%} "
-              f"{r['pred_held_on_rationale_only']:>7.1%}")
+        print(
+            f"{m:<22} {r['comprehensiveness_mean']:>7.4f} "
+            f"{r['sufficiency_mean']:>7.4f} {r['comprehensiveness_weighted']:>8.4f} "
+            f"{r['pred_flipped_after_removal']:>7.1%} "
+            f"{r['pred_held_on_rationale_only']:>7.1%}"
+        )
     print("\ncomp = confidence lost when the top-10% is removed (higher = more faithful)")
     print("suff = confidence lost when ONLY the top-10% is kept (lower = more faithful)")
     return results

@@ -32,7 +32,6 @@ import string
 from itertools import combinations
 
 import numpy as np
-import pandas as pd
 
 from src.evaluate import SERVICE_TERMS
 from src.explain.common import load_attributions
@@ -70,8 +69,7 @@ def top_k_words(word_scores: dict[str, float], k: int = TOP_K) -> set[str]:
     return {w for w, _ in sorted(word_scores.items(), key=lambda kv: -kv[1])[:k]}
 
 
-def top_k_overlap(attr_a: dict[str, float], attr_b: dict[str, float],
-                  k: int = TOP_K) -> float:
+def top_k_overlap(attr_a: dict[str, float], attr_b: dict[str, float], k: int = TOP_K) -> float:
     """Fraction of the top-k words shared between two methods for one example."""
     a, b = top_k_words(attr_a, k), top_k_words(attr_b, k)
     if not a or not b:
@@ -100,7 +98,8 @@ def find_confident_but_unfaithful(per_example: dict, threshold: float = 0.05):
     out = {}
     for method, rows in per_example.items():
         out[method] = [
-            r["complaint_id"] for r in rows
+            r["complaint_id"]
+            for r in rows
             if r["stratum"] == "confident_wrong" and r["comprehensiveness"] < threshold
         ]
     return out
@@ -129,8 +128,7 @@ def brand_token_test(word_attr, examples) -> dict:
                 continue
             results[method]["n"] += 1
             top = top_k_words(attr, TOP_K)
-            if any(any(t.startswith(w[:4]) or w.startswith(t[:4]) for w in top)
-                   for t in terms):
+            if any(any(t.startswith(w[:4]) or w.startswith(t[:4]) for w in top) for t in terms):
                 results[method]["hits"] += 1
 
     for m in results:
@@ -164,47 +162,62 @@ def junk_token_audit(word_attr) -> dict:
             if not top:
                 continue
             junk.append(sum(_is_junk(w) for w in top) / len(top))
-            punct.append(
-                sum(all(c in string.punctuation for c in w) for w in top) / len(top)
-            )
+            punct.append(sum(all(c in string.punctuation for c in w) for w in top) / len(top))
         out[method] = {
             "top3_junk_share": round(float(np.mean(junk)), 4),
             "top3_punctuation_share": round(float(np.mean(punct)), 4),
-            "examples_with_any_punctuation": round(
-                float(np.mean([p > 0 for p in punct])), 4),
+            "examples_with_any_punctuation": round(float(np.mean([p > 0 for p in punct])), 4),
         }
     return out
 
 
 def _plot(pairwise, per_stratum, faith) -> None:
     import matplotlib
+
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
-    short = {"integrated_gradients": "IG", "shap": "SHAP",
-             "attention_rollout": "attention", "random": "random"}
+    short = {
+        "integrated_gradients": "IG",
+        "shap": "SHAP",
+        "attention_rollout": "attention",
+        "random": "random",
+    }
 
     ax = axes[0]
     labels = [f"{short[a]}\nvs {short[b]}" for a, b in pairwise]
     vals = [pairwise[p]["mean"] for p in pairwise]
     bars = ax.bar(labels, vals, color=["#4C78A8", "#F58518", "#54A24B"])
     ax.axhline(SELF_AGREEMENT_CEILING, ls="--", c="#666", lw=1)
-    ax.text(2.4, SELF_AGREEMENT_CEILING + .02, "measurement ceiling (0.93)",
-            ha="right", fontsize=8, color="#666")
+    ax.text(
+        2.4,
+        SELF_AGREEMENT_CEILING + 0.02,
+        "measurement ceiling (0.93)",
+        ha="right",
+        fontsize=8,
+        color="#666",
+    )
     ax.set_ylim(0, 1.0)
     ax.set_ylabel(f"mean top-{TOP_K} word overlap")
-    ax.set_title(f"Methods disagree about the same predictions")
+    ax.set_title("Methods disagree about the same predictions")
     for b, v in zip(bars, vals):
-        ax.text(b.get_x() + b.get_width() / 2, v + .02, f"{v:.2f}",
-                ha="center", fontsize=10, fontweight="bold")
+        ax.text(
+            b.get_x() + b.get_width() / 2,
+            v + 0.02,
+            f"{v:.2f}",
+            ha="center",
+            fontsize=10,
+            fontweight="bold",
+        )
 
     ax = axes[1]
     strata = list(next(iter(per_stratum.values())).keys())
     x = np.arange(len(strata))
-    for i, (pair, by_s) in enumerate(per_stratum.items()):
-        ax.plot(x, [by_s[s] for s in strata], marker="o",
-                label=f"{short[pair[0]]} vs {short[pair[1]]}")
+    for pair, by_s in per_stratum.items():
+        ax.plot(
+            x, [by_s[s] for s in strata], marker="o", label=f"{short[pair[0]]} vs {short[pair[1]]}"
+        )
     ax.set_xticks(x, [s.replace("_", "\n") for s in strata], fontsize=8)
     ax.set_ylim(0, 1.0)
     ax.set_ylabel(f"mean top-{TOP_K} overlap")
@@ -219,9 +232,9 @@ def _plot(pairwise, per_stratum, faith) -> None:
     comp = [faith[m]["comprehensiveness_mean"] for m in order]
     suff = [faith[m]["sufficiency_mean"] for m in order]
     x = np.arange(len(order))
-    ax.bar(x - .2, comp, .4, label="comprehensiveness ↑", color="#4C78A8")
-    ax.bar(x + .2, suff, .4, label="sufficiency ↓", color="#E45756")
-    ax.axhline(0, c="#333", lw=.8)
+    ax.bar(x - 0.2, comp, 0.4, label="comprehensiveness ↑", color="#4C78A8")
+    ax.bar(x + 0.2, suff, 0.4, label="sufficiency ↓", color="#E45756")
+    ax.axhline(0, c="#333", lw=0.8)
     ax.set_xticks(x, [short[m] for m in order])
     ax.set_ylabel("confidence delta")
     ax.set_title("Faithfulness: only IG is both\ncomprehensive and sufficient")
@@ -254,8 +267,7 @@ def summarize():
             "full_agreement_rate": round(float((vals == 1).mean()), 4),
         }
         by_s = {}
-        for s in ("confident_correct", "confident_wrong",
-                  "uncertain_correct", "uncertain_wrong"):
+        for s in ("confident_correct", "confident_wrong", "uncertain_correct", "uncertain_wrong"):
             sel = [ov[i] for i in ids if stratum_of[i] == s]
             by_s[s] = round(float(np.mean(sel)), 4)
         per_stratum[(a, b)] = by_s
@@ -270,7 +282,8 @@ def summarize():
     by_m = {m: {r["complaint_id"]: r for r in rows} for m, rows in per_example.items()}
     cw_ids = [i for i in ids if stratum_of[i] == "confident_wrong"]
     ar_bad_ig_ok = sum(
-        1 for i in cw_ids
+        1
+        for i in cw_ids
         if by_m["attention_rollout"][i]["comprehensiveness"] < 0.05
         and by_m["integrated_gradients"][i]["comprehensiveness"] >= 0.05
     )
@@ -291,45 +304,56 @@ def summarize():
 
     print(f"Pairwise top-{TOP_K} word overlap (ceiling ~{SELF_AGREEMENT_CEILING}):")
     for (a, b), v in pairwise.items():
-        print(f"  {a:<21} vs {b:<19} mean {v['mean']:.3f}  "
-              f"zero-overlap {v['zero_overlap_rate']:.1%}")
+        print(
+            f"  {a:<21} vs {b:<19} mean {v['mean']:.3f}  zero-overlap {v['zero_overlap_rate']:.1%}"
+        )
 
-    print(f"\nOverlap by stratum:")
+    print("\nOverlap by stratum:")
     strata = list(next(iter(per_stratum.values())).keys())
     print(f"  {'pair':<40}" + "".join(f"{s:>20}" for s in strata))
     for (a, b), by_s in per_stratum.items():
-        print(f"  {a[:18]+' vs '+b[:18]:<40}" + "".join(f"{by_s[s]:>20.3f}" for s in strata))
+        print(f"  {a[:18] + ' vs ' + b[:18]:<40}" + "".join(f"{by_s[s]:>20.3f}" for s in strata))
 
     n_cw = sum(1 for i in ids if stratum_of[i] == "confident_wrong")
-    print(f"\nConfidently wrong AND unfaithful (comprehensiveness < 0.05), "
-          f"of {n_cw} confident-wrong examples:")
+    print(
+        f"\nConfidently wrong AND unfaithful (comprehensiveness < 0.05), "
+        f"of {n_cw} confident-wrong examples:"
+    )
     for m, v in unfaithful.items():
         print(f"  {m:<22} {len(v):>3}  ({len(v) / n_cw:.1%})")
 
-    print(f"\nBrand-token test -- does the top-{TOP_K} contain the term the model "
-          f"demonstrably keys on?")
+    print(
+        f"\nBrand-token test -- does the top-{TOP_K} contain the term the model "
+        f"demonstrably keys on?"
+    )
     for m, v in brand.items():
         if v["n"]:
             print(f"  {m:<22} {v['hits']:>3}/{v['n']}  ({v['rate']:.1%})")
 
-    print(f"\nattention unfaithful WHERE IG faithful (same example): "
-          f"{ar_bad_ig_ok}/{n_cw} ({ar_bad_ig_ok / n_cw:.1%})")
+    print(
+        f"\nattention unfaithful WHERE IG faithful (same example): "
+        f"{ar_bad_ig_ok}/{n_cw} ({ar_bad_ig_ok / n_cw:.1%})"
+    )
 
-    print(f"\nWhat is in the top-{TOP_K}? (punctuation and function words cannot be "
-          f"evidence for a product category)")
-    print(f"  {'method':<22}{'stopword/punct':>16}{'punctuation':>14}"
-          f"{'>=1 punct':>12}")
+    print(
+        f"\nWhat is in the top-{TOP_K}? (punctuation and function words cannot be "
+        f"evidence for a product category)"
+    )
+    print(f"  {'method':<22}{'stopword/punct':>16}{'punctuation':>14}{'>=1 punct':>12}")
     for m, v in junk.items():
-        print(f"  {m:<22}{v['top3_junk_share']:>15.1%}{v['top3_punctuation_share']:>14.1%}"
-              f"{v['examples_with_any_punctuation']:>12.1%}")
+        print(
+            f"  {m:<22}{v['top3_junk_share']:>15.1%}{v['top3_punctuation_share']:>14.1%}"
+            f"{v['examples_with_any_punctuation']:>12.1%}"
+        )
 
     _write_finding(pairwise, per_stratum, faith, unfaithful, brand, n_cw, ar_bad_ig_ok)
     print(f"\nwrote {FIGURES_DIR / 'disagreement.png'}")
     print(f"wrote {FINDING_PATH}")
 
 
-def _write_finding(pairwise, per_stratum, faith, unfaithful, brand, n_cw,
-                   ar_bad_ig_ok: int) -> None:
+def _write_finding(
+    pairwise, per_stratum, faith, unfaithful, brand, n_cw, ar_bad_ig_ok: int
+) -> None:
     lo = min(v["mean"] for v in pairwise.values())
     hi = max(v["mean"] for v in pairwise.values())
     worst_zero = max(v["zero_overlap_rate"] for v in pairwise.values())
@@ -351,22 +375,22 @@ Deleting the top 10% of tokens each method identifies costs the model:
 
 | method | confidence lost (comprehensiveness ↑) | rationale alone preserves prediction |
 |---|---|---|
-| Integrated Gradients | {faith['integrated_gradients']['comprehensiveness_mean']:.3f} | {faith['integrated_gradients']['pred_held_on_rationale_only']:.1%} |
-| SHAP | {faith['shap']['comprehensiveness_mean']:.3f} | {faith['shap']['pred_held_on_rationale_only']:.1%} |
-| attention rollout | {faith['attention_rollout']['comprehensiveness_mean']:.3f} | {faith['attention_rollout']['pred_held_on_rationale_only']:.1%} |
-| random tokens (control) | {faith['random']['comprehensiveness_mean']:.3f} | {faith['random']['pred_held_on_rationale_only']:.1%} |
+| Integrated Gradients | {faith["integrated_gradients"]["comprehensiveness_mean"]:.3f} | {faith["integrated_gradients"]["pred_held_on_rationale_only"]:.1%} |
+| SHAP | {faith["shap"]["comprehensiveness_mean"]:.3f} | {faith["shap"]["pred_held_on_rationale_only"]:.1%} |
+| attention rollout | {faith["attention_rollout"]["comprehensiveness_mean"]:.3f} | {faith["attention_rollout"]["pred_held_on_rationale_only"]:.1%} |
+| random tokens (control) | {faith["random"]["comprehensiveness_mean"]:.3f} | {faith["random"]["pred_held_on_rationale_only"]:.1%} |
 
 All three beat random, so all three carry real signal. But over that random
 baseline, attention rollout recovers only
-{(faith['attention_rollout']['comprehensiveness_mean'] - faith['random']['comprehensiveness_mean']) / (faith['integrated_gradients']['comprehensiveness_mean'] - faith['random']['comprehensiveness_mean']):.0%} of the faithfulness Integrated
+{(faith["attention_rollout"]["comprehensiveness_mean"] - faith["random"]["comprehensiveness_mean"]) / (faith["integrated_gradients"]["comprehensiveness_mean"] - faith["random"]["comprehensiveness_mean"]):.0%} of the faithfulness Integrated
 Gradients does.
 
 **The decision-relevant number:** among the {n_cw} predictions the model got wrong
 while highly confident — the cases where a plausible explanation is most likely
 to be believed and most likely to mislead — attention rollout produced an
 explanation that barely moves the model (comprehensiveness < 0.05)
-{len(unfaithful['attention_rollout']) / n_cw:.1%} of the time, versus
-{len(unfaithful['integrated_gradients']) / n_cw:.1%} for Integrated Gradients. In
+{len(unfaithful["attention_rollout"]) / n_cw:.1%} of the time, versus
+{len(unfaithful["integrated_gradients"]) / n_cw:.1%} for Integrated Gradients. In
 **{ar_bad_ig_ok / n_cw:.1%}** of those cases attention rollout was unfaithful while
 Integrated Gradients on the same example was not.
 
@@ -374,8 +398,8 @@ Integrated Gradients on the same example was not.
 attribution method involved — that the model leans on money-service brand names:
 accuracy on money-transfer complaints is 0.955 when one is named and 0.118 when
 only bank vocabulary appears. Asked to explain those predictions, Integrated
-Gradients puts the brand token in its top-{TOP_K} {brand['integrated_gradients']['rate']:.0%} of the time,
-against {brand['attention_rollout']['rate']:.0%} for attention rollout and {brand['shap']['rate']:.0%} for SHAP.
+Gradients puts the brand token in its top-{TOP_K} {brand["integrated_gradients"]["rate"]:.0%} of the time,
+against {brand["attention_rollout"]["rate"]:.0%} for attention rollout and {brand["shap"]["rate"]:.0%} for SHAP.
 
 **What this does not show.** Disagreement is roughly flat across confident and
 uncertain predictions ({min(strata_vals):.2f}–{max(strata_vals):.2f} across strata), so it is not
