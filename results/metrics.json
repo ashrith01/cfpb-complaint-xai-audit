@@ -421,7 +421,7 @@
     "model": "distilbert-base-uncased",
     "seed": 42,
     "test": {
-      "accuracy": 0.8496296296296296,
+      "accuracy": 0.84,
       "confusion_matrix": [
         [
           521,
@@ -514,16 +514,16 @@
         "vehicle_loan",
         "student_loan"
       ],
-      "macro_f1": 0.8495105418955551,
+      "macro_f1": 0.8411038685881583,
       "per_class_f1": {
-        "checking_savings": 0.7972222222222223,
-        "credit_card": 0.8114374034003091,
-        "credit_reporting": 0.7840481565086531,
-        "debt_collection": 0.7988121752041574,
-        "money_transfer": 0.8324488248673237,
-        "mortgage": 0.9381058911260254,
-        "student_loan": 0.936231884057971,
-        "vehicle_loan": 0.8977777777777778
+        "checking_savings": 0.7949438202247191,
+        "credit_card": 0.808955223880597,
+        "credit_reporting": 0.768361581920904,
+        "debt_collection": 0.7958426132145509,
+        "money_transfer": 0.8227168073676132,
+        "mortgage": 0.9227306826706677,
+        "student_loan": 0.9367469879518072,
+        "vehicle_loan": 0.878533231474408
       }
     },
     "val": {
