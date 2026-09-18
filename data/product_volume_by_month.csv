@@ -1,0 +1,265 @@
+month,product,n
+2024-01,Checking or savings account,4032
+2024-01,Credit card,5247
+2024-01,Credit reporting or other personal consumer reports,119512
+2024-01,Debt collection,7175
+2024-01,"Money transfer, virtual currency, or money service",1286
+2024-01,Mortgage,1812
+2024-01,Student loan,1617
+2024-01,Vehicle loan or lease,1070
+2024-02,Checking or savings account,3833
+2024-02,Credit card,5182
+2024-02,Credit reporting or other personal consumer reports,132992
+2024-02,Debt collection,8772
+2024-02,"Money transfer, virtual currency, or money service",1306
+2024-02,Mortgage,1942
+2024-02,Student loan,1222
+2024-02,Vehicle loan or lease,1032
+2024-03,Checking or savings account,4257
+2024-03,Credit card,5889
+2024-03,Credit reporting or other personal consumer reports,147637
+2024-03,Debt collection,12354
+2024-03,"Money transfer, virtual currency, or money service",1457
+2024-03,Mortgage,1893
+2024-03,Student loan,1323
+2024-03,Vehicle loan or lease,1333
+2024-04,Checking or savings account,4327
+2024-04,Credit card,6676
+2024-04,Credit reporting or other personal consumer reports,160450
+2024-04,Debt collection,12912
+2024-04,"Money transfer, virtual currency, or money service",1285
+2024-04,Mortgage,1817
+2024-04,Student loan,1159
+2024-04,Vehicle loan or lease,1094
+2024-05,Checking or savings account,4539
+2024-05,Credit card,6760
+2024-05,Credit reporting or other personal consumer reports,181420
+2024-05,Debt collection,12426
+2024-05,"Money transfer, virtual currency, or money service",1351
+2024-05,Mortgage,1713
+2024-05,Student loan,1260
+2024-05,Vehicle loan or lease,1050
+2024-06,Checking or savings account,3886
+2024-06,Credit card,5535
+2024-06,Credit reporting or other personal consumer reports,177583
+2024-06,Debt collection,11099
+2024-06,"Money transfer, virtual currency, or money service",1268
+2024-06,Mortgage,1575
+2024-06,Student loan,987
+2024-06,Vehicle loan or lease,946
+2024-07,Checking or savings account,4329
+2024-07,Credit card,6192
+2024-07,Credit reporting or other personal consumer reports,203567
+2024-07,Debt collection,12149
+2024-07,"Money transfer, virtual currency, or money service",1328
+2024-07,Mortgage,1737
+2024-07,Student loan,960
+2024-07,Vehicle loan or lease,1025
+2024-08,Checking or savings account,4683
+2024-08,Credit card,7355
+2024-08,Credit reporting or other personal consumer reports,230748
+2024-08,Debt collection,14171
+2024-08,"Money transfer, virtual currency, or money service",1557
+2024-08,Mortgage,1861
+2024-08,Student loan,882
+2024-08,Vehicle loan or lease,1150
+2024-09,Checking or savings account,4270
+2024-09,Credit card,7185
+2024-09,Credit reporting or other personal consumer reports,230926
+2024-09,Debt collection,15475
+2024-09,"Money transfer, virtual currency, or money service",1316
+2024-09,Mortgage,1779
+2024-09,Student loan,1549
+2024-09,Vehicle loan or lease,1087
+2024-10,Checking or savings account,4692
+2024-10,Credit card,7176
+2024-10,Credit reporting or other personal consumer reports,259079
+2024-10,Debt collection,17482
+2024-10,"Money transfer, virtual currency, or money service",1450
+2024-10,Mortgage,1809
+2024-10,Student loan,1459
+2024-10,Vehicle loan or lease,1187
+2024-11,Checking or savings account,5175
+2024-11,Credit card,6095
+2024-11,Credit reporting or other personal consumer reports,253749
+2024-11,Debt collection,15454
+2024-11,"Money transfer, virtual currency, or money service",1416
+2024-11,Mortgage,1717
+2024-11,Student loan,916
+2024-11,Vehicle loan or lease,1141
+2024-12,Checking or savings account,4798
+2024-12,Credit card,6697
+2024-12,Credit reporting or other personal consumer reports,267923
+2024-12,Debt collection,16425
+2024-12,"Money transfer, virtual currency, or money service",1731
+2024-12,Mortgage,1784
+2024-12,Student loan,1323
+2024-12,Vehicle loan or lease,1245
+2025-01,Checking or savings account,18367
+2025-01,Credit card,9073
+2025-01,Credit reporting or other personal consumer reports,365867
+2025-01,Debt collection,23830
+2025-01,"Money transfer, virtual currency, or money service",49743
+2025-01,Mortgage,2204
+2025-01,Student loan,2232
+2025-01,Vehicle loan or lease,1920
+2025-02,Checking or savings account,5452
+2025-02,Credit card,6213
+2025-02,Credit reporting or other personal consumer reports,293833
+2025-02,Debt collection,17032
+2025-02,"Money transfer, virtual currency, or money service",6128
+2025-02,Mortgage,1754
+2025-02,Student loan,1868
+2025-02,Vehicle loan or lease,1358
+2025-03,Checking or savings account,5070
+2025-03,Credit card,6255
+2025-03,Credit reporting or other personal consumer reports,354016
+2025-03,Debt collection,20369
+2025-03,"Money transfer, virtual currency, or money service",3032
+2025-03,Mortgage,1824
+2025-03,Student loan,3413
+2025-03,Vehicle loan or lease,1309
+2025-04,Checking or savings account,5229
+2025-04,Credit card,6897
+2025-04,Credit reporting or other personal consumer reports,364036
+2025-04,Debt collection,20304
+2025-04,"Money transfer, virtual currency, or money service",2504
+2025-04,Mortgage,1846
+2025-04,Student loan,2159
+2025-04,Vehicle loan or lease,1423
+2025-05,Checking or savings account,5394
+2025-05,Credit card,7515
+2025-05,Credit reporting or other personal consumer reports,370373
+2025-05,Debt collection,21959
+2025-05,"Money transfer, virtual currency, or money service",2652
+2025-05,Mortgage,1969
+2025-05,Student loan,1902
+2025-05,Vehicle loan or lease,1643
+2025-06,Checking or savings account,5557
+2025-06,Credit card,7364
+2025-06,Credit reporting or other personal consumer reports,368095
+2025-06,Debt collection,21860
+2025-06,"Money transfer, virtual currency, or money service",2408
+2025-06,Mortgage,1903
+2025-06,Student loan,1409
+2025-06,Vehicle loan or lease,1708
+2025-07,Checking or savings account,6403
+2025-07,Credit card,8105
+2025-07,Credit reporting or other personal consumer reports,423133
+2025-07,Debt collection,24872
+2025-07,"Money transfer, virtual currency, or money service",2823
+2025-07,Mortgage,2173
+2025-07,Student loan,1559
+2025-07,Vehicle loan or lease,1970
+2025-08,Checking or savings account,6505
+2025-08,Credit card,7919
+2025-08,Credit reporting or other personal consumer reports,445598
+2025-08,Debt collection,25626
+2025-08,"Money transfer, virtual currency, or money service",2879
+2025-08,Mortgage,2046
+2025-08,Student loan,1262
+2025-08,Vehicle loan or lease,1738
+2025-09,Checking or savings account,6141
+2025-09,Credit card,8504
+2025-09,Credit reporting or other personal consumer reports,452648
+2025-09,Debt collection,26816
+2025-09,"Money transfer, virtual currency, or money service",2505
+2025-09,Mortgage,2021
+2025-09,Student loan,1326
+2025-09,Vehicle loan or lease,1743
+2025-10,Checking or savings account,6308
+2025-10,Credit card,7413
+2025-10,Credit reporting or other personal consumer reports,469194
+2025-10,Debt collection,25547
+2025-10,"Money transfer, virtual currency, or money service",4193
+2025-10,Mortgage,2091
+2025-10,Student loan,1313
+2025-10,Vehicle loan or lease,1767
+2025-11,Checking or savings account,6077
+2025-11,Credit card,6861
+2025-11,Credit reporting or other personal consumer reports,448084
+2025-11,Debt collection,25710
+2025-11,"Money transfer, virtual currency, or money service",2603
+2025-11,Mortgage,2215
+2025-11,Student loan,1187
+2025-11,Vehicle loan or lease,1904
+2025-12,Checking or savings account,7692
+2025-12,Credit card,7859
+2025-12,Credit reporting or other personal consumer reports,455424
+2025-12,Debt collection,29279
+2025-12,"Money transfer, virtual currency, or money service",3149
+2025-12,Mortgage,2651
+2025-12,Student loan,1664
+2025-12,Vehicle loan or lease,2286
+2026-01,Checking or savings account,7916
+2026-01,Credit card,9516
+2026-01,Credit reporting or other personal consumer reports,478964
+2026-01,Debt collection,31014
+2026-01,"Money transfer, virtual currency, or money service",3478
+2026-01,Mortgage,2999
+2026-01,Student loan,2100
+2026-01,Vehicle loan or lease,2523
+2026-02,Checking or savings account,6559
+2026-02,Credit card,7401
+2026-02,Credit reporting or other personal consumer reports,444806
+2026-02,Debt collection,27397
+2026-02,"Money transfer, virtual currency, or money service",2766
+2026-02,Mortgage,2574
+2026-02,Student loan,1553
+2026-02,Vehicle loan or lease,1905
+2026-03,Checking or savings account,7824
+2026-03,Credit card,8326
+2026-03,Credit reporting or other personal consumer reports,552101
+2026-03,Debt collection,33671
+2026-03,"Money transfer, virtual currency, or money service",3394
+2026-03,Mortgage,2945
+2026-03,Student loan,2045
+2026-03,Vehicle loan or lease,2275
+2026-04,Checking or savings account,7674
+2026-04,Credit card,8229
+2026-04,Credit reporting or other personal consumer reports,561358
+2026-04,Debt collection,28036
+2026-04,"Money transfer, virtual currency, or money service",3457
+2026-04,Mortgage,3021
+2026-04,Student loan,1997
+2026-04,Vehicle loan or lease,2167
+2026-05,Checking or savings account,7198
+2026-05,Credit card,7922
+2026-05,Credit reporting or other personal consumer reports,564818
+2026-05,Debt collection,27992
+2026-05,"Money transfer, virtual currency, or money service",3215
+2026-05,Mortgage,2786
+2026-05,Student loan,1615
+2026-05,Vehicle loan or lease,1991
+2026-06,Checking or savings account,7671
+2026-06,Credit card,7459
+2026-06,Credit reporting or other personal consumer reports,565831
+2026-06,Debt collection,27629
+2026-06,"Money transfer, virtual currency, or money service",3038
+2026-06,Mortgage,2969
+2026-06,Student loan,1724
+2026-06,Vehicle loan or lease,2002
+2026-07,Checking or savings account,7978
+2026-07,Credit card,8041
+2026-07,Credit reporting or other personal consumer reports,617255
+2026-07,Debt collection,24770
+2026-07,"Money transfer, virtual currency, or money service",3482
+2026-07,Mortgage,3084
+2026-07,Student loan,1799
+2026-07,Vehicle loan or lease,2170
+2026-08,Checking or savings account,7761
+2026-08,Credit card,8189
+2026-08,Credit reporting or other personal consumer reports,614109
+2026-08,Debt collection,20643
+2026-08,"Money transfer, virtual currency, or money service",3179
+2026-08,Mortgage,2807
+2026-08,Student loan,1437
+2026-08,Vehicle loan or lease,2045
+2026-09,Checking or savings account,1768
+2026-09,Credit card,1863
+2026-09,Credit reporting or other personal consumer reports,300105
+2026-09,Debt collection,7337
+2026-09,"Money transfer, virtual currency, or money service",731
+2026-09,Mortgage,558
+2026-09,Student loan,426
+2026-09,Vehicle loan or lease,558

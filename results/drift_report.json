@@ -1,0 +1,676 @@
+{
+  "psi_thresholds": {
+    "stable": "< 0.1",
+    "moderate": "0.1-0.25"
+  },
+  "production": {
+    "model": "distilbert (production, registry @production)",
+    "reference": "training split (text); pooled held-out predictions (pred/conf)",
+    "overall_macro_f1": 0.8495105418955551,
+    "windows": [
+      {
+        "window": "2024Q1",
+        "n": 441,
+        "macro_f1": 0.7987235537549009,
+        "accuracy": 0.8163265306122449,
+        "psi": {
+          "narrative_length": 0.0395,
+          "token_distribution": 0.0443,
+          "predicted_class": 0.0861,
+          "confidence": 0.0197
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0404,
+          "token_distribution": 0.0176,
+          "predicted_class": 0.0288,
+          "confidence": 0.0364
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": false
+        }
+      },
+      {
+        "window": "2024Q2",
+        "n": 464,
+        "macro_f1": 0.8712382886734533,
+        "accuracy": 0.875,
+        "psi": {
+          "narrative_length": 0.0197,
+          "token_distribution": 0.0474,
+          "predicted_class": 0.0485,
+          "confidence": 0.018
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0327,
+          "token_distribution": 0.0158,
+          "predicted_class": 0.0256,
+          "confidence": 0.0334
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": false
+        }
+      },
+      {
+        "window": "2024Q3",
+        "n": 435,
+        "macro_f1": 0.8152778827600403,
+        "accuracy": 0.8206896551724138,
+        "psi": {
+          "narrative_length": 0.0127,
+          "token_distribution": 0.0291,
+          "predicted_class": 0.0858,
+          "confidence": 0.0257
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0359,
+          "token_distribution": 0.018,
+          "predicted_class": 0.0295,
+          "confidence": 0.0367
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": false
+        }
+      },
+      {
+        "window": "2024Q4",
+        "n": 505,
+        "macro_f1": 0.8400844855870948,
+        "accuracy": 0.8514851485148515,
+        "psi": {
+          "narrative_length": 0.0073,
+          "token_distribution": 0.0236,
+          "predicted_class": 0.042,
+          "confidence": 0.0196
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0298,
+          "token_distribution": 0.0154,
+          "predicted_class": 0.0248,
+          "confidence": 0.0286
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": false
+        }
+      },
+      {
+        "window": "2025Q1",
+        "n": 899,
+        "macro_f1": 0.8641058950426144,
+        "accuracy": 0.8776418242491657,
+        "psi": {
+          "narrative_length": 0.102,
+          "token_distribution": 0.0342,
+          "predicted_class": 0.1984,
+          "confidence": 0.0807
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0188,
+          "token_distribution": 0.0079,
+          "predicted_class": 0.0135,
+          "confidence": 0.0159
+        },
+        "verdict": {
+          "narrative_length": "moderate",
+          "token_distribution": "stable",
+          "predicted_class": "moderate",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        }
+      },
+      {
+        "window": "2025Q2",
+        "n": 614,
+        "macro_f1": 0.8176800478788643,
+        "accuracy": 0.8143322475570033,
+        "psi": {
+          "narrative_length": 0.012,
+          "token_distribution": 0.0145,
+          "predicted_class": 0.0209,
+          "confidence": 0.0419
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0264,
+          "token_distribution": 0.0123,
+          "predicted_class": 0.0216,
+          "confidence": 0.0251
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": false,
+          "confidence": true
+        }
+      },
+      {
+        "window": "2025Q3",
+        "n": 689,
+        "macro_f1": 0.8458075351776257,
+        "accuracy": 0.8447024673439768,
+        "psi": {
+          "narrative_length": 0.0324,
+          "token_distribution": 0.015,
+          "predicted_class": 0.0237,
+          "confidence": 0.0344
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0222,
+          "token_distribution": 0.0108,
+          "predicted_class": 0.017,
+          "confidence": 0.0226
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        }
+      },
+      {
+        "window": "2025Q4",
+        "n": 569,
+        "macro_f1": 0.8639305329587896,
+        "accuracy": 0.8681898066783831,
+        "psi": {
+          "narrative_length": 0.0337,
+          "token_distribution": 0.0251,
+          "predicted_class": 0.0451,
+          "confidence": 0.0506
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0298,
+          "token_distribution": 0.0142,
+          "predicted_class": 0.0248,
+          "confidence": 0.0273
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        }
+      },
+      {
+        "window": "2026Q1",
+        "n": 437,
+        "macro_f1": 0.7963994160116201,
+        "accuracy": 0.8649885583524027,
+        "psi": {
+          "narrative_length": 0.0384,
+          "token_distribution": 0.0292,
+          "predicted_class": 0.1491,
+          "confidence": 0.0387
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0373,
+          "token_distribution": 0.0171,
+          "predicted_class": 0.0301,
+          "confidence": 0.0361
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "moderate",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        }
+      },
+      {
+        "window": "2026Q2+Q3",
+        "n": 347,
+        "macro_f1": 0.7685092726636655,
+        "accuracy": 0.8414985590778098,
+        "psi": {
+          "narrative_length": 0.1057,
+          "token_distribution": 0.05,
+          "predicted_class": 0.2293,
+          "confidence": 0.0184
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0539,
+          "token_distribution": 0.0217,
+          "predicted_class": 0.0416,
+          "confidence": 0.0481
+        },
+        "verdict": {
+          "narrative_length": "moderate",
+          "token_distribution": "stable",
+          "predicted_class": "moderate",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": false
+        }
+      }
+    ]
+  },
+  "backtest": {
+    "model": "tfidf+logreg (Day 2 config), refit on training rows received before cutoff",
+    "cutoff": "2025-01-01",
+    "n_fit": 8594,
+    "in_time_macro_f1": 0.8208,
+    "windows": [
+      {
+        "window": "2024Q1",
+        "n": 441,
+        "macro_f1": 0.7782268469879405,
+        "accuracy": 0.7959183673469388,
+        "psi": {
+          "narrative_length": 0.0178,
+          "token_distribution": 0.0171,
+          "predicted_class": 0.0147,
+          "confidence": 0.0245
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0377,
+          "token_distribution": 0.0171,
+          "predicted_class": 0.024,
+          "confidence": 0.0293
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": false,
+          "confidence": false
+        },
+        "out_of_time": false,
+        "f1_drop_vs_in_time": 0.0426
+      },
+      {
+        "window": "2024Q2",
+        "n": 464,
+        "macro_f1": 0.8476028484856533,
+        "accuracy": 0.8577586206896551,
+        "psi": {
+          "narrative_length": 0.0103,
+          "token_distribution": 0.0198,
+          "predicted_class": 0.0126,
+          "confidence": 0.0084
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0334,
+          "token_distribution": 0.0167,
+          "predicted_class": 0.025,
+          "confidence": 0.0292
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": false,
+          "confidence": false
+        },
+        "out_of_time": false,
+        "f1_drop_vs_in_time": -0.0268
+      },
+      {
+        "window": "2024Q3",
+        "n": 435,
+        "macro_f1": 0.7957351078257047,
+        "accuracy": 0.8045977011494253,
+        "psi": {
+          "narrative_length": 0.0178,
+          "token_distribution": 0.0138,
+          "predicted_class": 0.0226,
+          "confidence": 0.0077
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0367,
+          "token_distribution": 0.0184,
+          "predicted_class": 0.0223,
+          "confidence": 0.0309
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": false,
+          "predicted_class": true,
+          "confidence": false
+        },
+        "out_of_time": false,
+        "f1_drop_vs_in_time": 0.0251
+      },
+      {
+        "window": "2024Q4",
+        "n": 505,
+        "macro_f1": 0.8480618556601024,
+        "accuracy": 0.8574257425742574,
+        "psi": {
+          "narrative_length": 0.005,
+          "token_distribution": 0.0187,
+          "predicted_class": 0.0075,
+          "confidence": 0.0093
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0339,
+          "token_distribution": 0.0148,
+          "predicted_class": 0.0209,
+          "confidence": 0.0269
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": false,
+          "confidence": false
+        },
+        "out_of_time": false,
+        "f1_drop_vs_in_time": -0.0272
+      },
+      {
+        "window": "2025Q1",
+        "n": 899,
+        "macro_f1": 0.7833452739946788,
+        "accuracy": 0.7719688542825361,
+        "psi": {
+          "narrative_length": 0.089,
+          "token_distribution": 0.0566,
+          "predicted_class": 0.2826,
+          "confidence": 0.1891
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0171,
+          "token_distribution": 0.0079,
+          "predicted_class": 0.0082,
+          "confidence": 0.0096
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "significant",
+          "confidence": "moderate"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        },
+        "out_of_time": true,
+        "f1_drop_vs_in_time": 0.0375
+      },
+      {
+        "window": "2025Q2",
+        "n": 614,
+        "macro_f1": 0.7795886010657291,
+        "accuracy": 0.7768729641693811,
+        "psi": {
+          "narrative_length": 0.012,
+          "token_distribution": 0.0444,
+          "predicted_class": 0.0485,
+          "confidence": 0.0603
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0239,
+          "token_distribution": 0.0124,
+          "predicted_class": 0.0155,
+          "confidence": 0.0184
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": false,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        },
+        "out_of_time": true,
+        "f1_drop_vs_in_time": 0.0412
+      },
+      {
+        "window": "2025Q3",
+        "n": 689,
+        "macro_f1": 0.7909066273983706,
+        "accuracy": 0.7895500725689405,
+        "psi": {
+          "narrative_length": 0.0435,
+          "token_distribution": 0.0423,
+          "predicted_class": 0.0441,
+          "confidence": 0.028
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0239,
+          "token_distribution": 0.011,
+          "predicted_class": 0.0129,
+          "confidence": 0.0154
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "stable",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        },
+        "out_of_time": true,
+        "f1_drop_vs_in_time": 0.0299
+      },
+      {
+        "window": "2025Q4",
+        "n": 569,
+        "macro_f1": 0.7793472574586473,
+        "accuracy": 0.7873462214411248,
+        "psi": {
+          "narrative_length": 0.0545,
+          "token_distribution": 0.0702,
+          "predicted_class": 0.1054,
+          "confidence": 0.0382
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0298,
+          "token_distribution": 0.0136,
+          "predicted_class": 0.0171,
+          "confidence": 0.0212
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "moderate",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        },
+        "out_of_time": true,
+        "f1_drop_vs_in_time": 0.0415
+      },
+      {
+        "window": "2026Q1",
+        "n": 437,
+        "macro_f1": 0.7052500446420702,
+        "accuracy": 0.7757437070938215,
+        "psi": {
+          "narrative_length": 0.0479,
+          "token_distribution": 0.0664,
+          "predicted_class": 0.1563,
+          "confidence": 0.0691
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0386,
+          "token_distribution": 0.0184,
+          "predicted_class": 0.0243,
+          "confidence": 0.0298
+        },
+        "verdict": {
+          "narrative_length": "stable",
+          "token_distribution": "stable",
+          "predicted_class": "moderate",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        },
+        "out_of_time": true,
+        "f1_drop_vs_in_time": 0.1156
+      },
+      {
+        "window": "2026Q2+Q3",
+        "n": 347,
+        "macro_f1": 0.7056143575881126,
+        "accuracy": 0.7838616714697406,
+        "psi": {
+          "narrative_length": 0.1185,
+          "token_distribution": 0.0936,
+          "predicted_class": 0.2142,
+          "confidence": 0.0519
+        },
+        "noise_floor_p95": {
+          "narrative_length": 0.0461,
+          "token_distribution": 0.0226,
+          "predicted_class": 0.0326,
+          "confidence": 0.0451
+        },
+        "verdict": {
+          "narrative_length": "moderate",
+          "token_distribution": "stable",
+          "predicted_class": "moderate",
+          "confidence": "stable"
+        },
+        "above_noise": {
+          "narrative_length": true,
+          "token_distribution": true,
+          "predicted_class": true,
+          "confidence": true
+        },
+        "out_of_time": true,
+        "f1_drop_vs_in_time": 0.1152
+      }
+    ],
+    "spearman_psi_vs_f1_drop": {
+      "narrative_length": 0.314,
+      "token_distribution": 0.771,
+      "predicted_class": 0.371,
+      "confidence": 0.257
+    }
+  },
+  "class_prior": {
+    "reference": "all complaints in the 8 classes received 2024-01 to 2026-08 (excl.)",
+    "current": "complaints received after 2026-08 (post-snapshot, no narratives)",
+    "n_reference": 12301984,
+    "n_current": 313346,
+    "reference_share": {
+      "credit_reporting": 0.891,
+      "debt_collection": 0.052,
+      "checking_savings": 0.0154,
+      "credit_card": 0.0181,
+      "money_transfer": 0.0101,
+      "mortgage": 0.0054,
+      "vehicle_loan": 0.004,
+      "student_loan": 0.004
+    },
+    "current_share": {
+      "credit_reporting": 0.9577,
+      "debt_collection": 0.0234,
+      "checking_savings": 0.0056,
+      "credit_card": 0.0059,
+      "money_transfer": 0.0023,
+      "mortgage": 0.0018,
+      "vehicle_loan": 0.0018,
+      "student_loan": 0.0014
+    },
+    "psi_current_vs_reference": 0.071,
+    "verdict": "stable",
+    "psi_traffic_vs_balanced_training_prior": 3.5031
+  }
+}
