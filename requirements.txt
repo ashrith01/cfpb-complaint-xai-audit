@@ -5,15 +5,32 @@ accelerate==1.14.0
 aiohappyeyeballs==2.7.1
     # via aiohttp
 aiohttp==3.14.3
-    # via fsspec
+    # via
+    #   fsspec
+    #   mlflow
 aiosignal==1.4.0
     # via aiohttp
+alembic==1.20.0
+    # via mlflow
 annotated-doc==0.0.5
-    # via typer
+    # via
+    #   fastapi
+    #   typer
+annotated-types==0.8.0
+    # via pydantic
 anyio==4.14.2
-    # via httpx
+    # via
+    #   httpx
+    #   mlflow-skinny
+    #   starlette
 attrs==26.1.0
     # via aiohttp
+blinker==1.9.0
+    # via flask
+cachetools==7.2.0
+    # via
+    #   mlflow-skinny
+    #   mlflow-tracing
 captum==0.9.0
     # via -r requirements.in
 certifi==2026.7.22
@@ -21,27 +38,55 @@ certifi==2026.7.22
     #   httpcore
     #   httpx
     #   requests
+cffi==2.1.1
+    # via cryptography
 charset-normalizer==3.4.9
     # via requests
 click==8.4.2
-    # via huggingface-hub
+    # via
+    #   flask
+    #   huggingface-hub
+    #   mlflow-skinny
+    #   uvicorn
 cloudpickle==3.1.2
-    # via shap
+    # via
+    #   mlflow-skinny
+    #   shap
 contourpy==1.3.3
     # via matplotlib
+cryptography==50.0.1
+    # via
+    #   google-auth
+    #   mlflow
 cycler==0.12.1
     # via matplotlib
+databricks-sdk==0.139.0
+    # via
+    #   mlflow-skinny
+    #   mlflow-tracing
 datasets==5.0.1
     # via -r requirements.in
 dill==0.4.1
     # via
     #   datasets
     #   multiprocess
+docker==7.2.0
+    # via mlflow
+fastapi==0.141.1
+    # via
+    #   -r requirements.in
+    #   mlflow-skinny
 filelock==3.32.2
     # via
     #   datasets
     #   huggingface-hub
     #   torch
+flask==3.1.3
+    # via
+    #   flask-cors
+    #   mlflow
+flask-cors==6.0.5
+    # via mlflow
 fonttools==4.63.0
     # via matplotlib
 frozenlist==1.8.0
@@ -53,16 +98,37 @@ fsspec==2026.6.0
     #   datasets
     #   huggingface-hub
     #   torch
+gitdb==4.0.12
+    # via gitpython
+gitpython==3.1.62
+    # via mlflow-skinny
+google-auth==2.58.0
+    # via databricks-sdk
+graphene==3.4.3
+    # via mlflow
+graphql-core==3.2.12
+    # via
+    #   graphene
+    #   graphql-relay
+graphql-relay==3.2.0
+    # via graphene
+gunicorn==26.2.0
+    # via mlflow
 h11==0.16.0
-    # via httpcore
+    # via
+    #   httpcore
+    #   uvicorn
 hf-xet==1.6.0
     # via huggingface-hub
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via
+    #   -r requirements.in
     #   datasets
     #   huggingface-hub
+huey==3.4.0
+    # via mlflow
 huggingface-hub==1.26.1
     # via
     #   accelerate
@@ -76,10 +142,16 @@ idna==3.18
     #   httpx
     #   requests
     #   yarl
+importlib-metadata==9.0.1
+    # via mlflow-skinny
 iniconfig==2.3.0
     # via pytest
+itsdangerous==2.2.0
+    # via flask
 jinja2==3.1.6
-    # via torch
+    # via
+    #   flask
+    #   torch
 joblib==1.5.3
     # via scikit-learn
 kiwisolver==1.5.0
@@ -88,16 +160,29 @@ llvmlite==0.48.0
     # via
     #   numba
     #   shap
+mako==1.4.1
+    # via alembic
 markdown-it-py==4.2.0
     # via rich
 markupsafe==3.0.3
-    # via jinja2
+    # via
+    #   flask
+    #   jinja2
+    #   mako
+    #   werkzeug
 matplotlib==3.11.1
     # via
     #   -r requirements.in
     #   captum
+    #   mlflow
 mdurl==0.1.2
     # via markdown-it-py
+mlflow==3.16.1
+    # via -r requirements.in
+mlflow-skinny==3.16.1
+    # via mlflow
+mlflow-tracing==3.16.1
+    # via mlflow
 mpmath==1.3.0
     # via sympy
 multidict==6.7.1
@@ -119,13 +204,31 @@ numpy==2.4.6
     #   contourpy
     #   datasets
     #   matplotlib
+    #   mlflow
     #   numba
     #   pandas
     #   peft
     #   scikit-learn
     #   scipy
     #   shap
+    #   skops
     #   transformers
+opentelemetry-api==1.44.0
+    # via
+    #   mlflow-skinny
+    #   mlflow-tracing
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+opentelemetry-proto==1.44.0
+    # via
+    #   mlflow-skinny
+    #   mlflow-tracing
+opentelemetry-sdk==1.44.0
+    # via
+    #   mlflow-skinny
+    #   mlflow-tracing
+opentelemetry-semantic-conventions==0.65b0
+    # via opentelemetry-sdk
 packaging==26.3
     # via
     #   accelerate
@@ -133,14 +236,18 @@ packaging==26.3
     #   datasets
     #   huggingface-hub
     #   matplotlib
+    #   mlflow-skinny
+    #   mlflow-tracing
     #   peft
     #   pytest
     #   shap
+    #   skops
     #   transformers
 pandas==3.0.5
     # via
     #   -r requirements.in
     #   datasets
+    #   mlflow
     #   shap
 peft==0.20.0
     # via -r requirements.in
@@ -148,10 +255,18 @@ pillow==12.3.0
     # via matplotlib
 pluggy==1.6.0
     # via pytest
+prettytable==3.18.0
+    # via skops
 propcache==0.5.2
     # via
     #   aiohttp
     #   yarl
+protobuf==6.33.6
+    # via
+    #   databricks-sdk
+    #   mlflow-skinny
+    #   mlflow-tracing
+    #   opentelemetry-proto
 psutil==7.2.2
     # via
     #   accelerate
@@ -160,6 +275,20 @@ pyarrow==25.0.0
     # via
     #   -r requirements.in
     #   datasets
+    #   mlflow
+pyasn1==0.6.4
+    # via pyasn1-modules
+pyasn1-modules==0.4.2
+    # via google-auth
+pycparser==3.0
+    # via cffi
+pydantic==2.13.5
+    # via
+    #   fastapi
+    #   mlflow-skinny
+    #   mlflow-tracing
+pydantic-core==2.46.5
+    # via pydantic
 pygments==2.20.0
     # via
     #   pytest
@@ -170,21 +299,31 @@ pytest==9.1.1
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
+    #   graphene
     #   matplotlib
     #   pandas
+python-dotenv==1.2.3
+    # via mlflow-skinny
 pyyaml==6.0.3
     # via
     #   accelerate
     #   datasets
     #   huggingface-hub
+    #   mlflow-skinny
     #   peft
     #   transformers
 regex==2026.7.19
     # via transformers
 requests==2.34.2
-    # via datasets
+    # via
+    #   databricks-sdk
+    #   datasets
+    #   docker
+    #   mlflow-skinny
 rich==15.0.0
     # via typer
+ruff==0.16.8
+    # via -r requirements.in
 safetensors==0.8.0
     # via
     #   accelerate
@@ -193,11 +332,15 @@ safetensors==0.8.0
 scikit-learn==1.9.0
     # via
     #   -r requirements.in
+    #   mlflow
     #   shap
+    #   skops
 scipy==1.18.0
     # via
+    #   mlflow
     #   scikit-learn
     #   shap
+    #   skops
 setuptools==83.0.0
     # via torch
 shap==0.52.0
@@ -206,8 +349,22 @@ shellingham==1.5.4
     # via typer
 six==1.17.0
     # via python-dateutil
+skops==0.15.0
+    # via mlflow
 slicer==0.0.8
     # via shap
+smmap==5.0.3
+    # via gitdb
+sqlalchemy==2.0.54
+    # via
+    #   alembic
+    #   mlflow
+sqlparse==0.6.0
+    # via mlflow-skinny
+starlette==1.6.0
+    # via
+    #   fastapi
+    #   mlflow-skinny
 sympy==1.14.0
     # via torch
 threadpoolctl==3.6.0
@@ -236,11 +393,41 @@ typer==0.27.1
     # via transformers
 typing-extensions==4.16.0
     # via
+    #   alembic
+    #   fastapi
+    #   graphene
     #   huggingface-hub
+    #   mlflow-skinny
+    #   opentelemetry-api
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   pydantic
+    #   pydantic-core
+    #   sqlalchemy
     #   torch
+    #   typing-inspection
+typing-inspection==0.4.4
+    # via
+    #   fastapi
+    #   pydantic
 urllib3==2.7.0
-    # via requests
+    # via
+    #   databricks-sdk
+    #   docker
+    #   requests
+uvicorn==0.53.0
+    # via
+    #   -r requirements.in
+    #   mlflow-skinny
+wcwidth==0.8.4
+    # via prettytable
+werkzeug==3.1.8
+    # via
+    #   flask
+    #   flask-cors
 xxhash==3.8.1
     # via datasets
 yarl==1.24.5
     # via aiohttp
+zipp==4.1.0
+    # via importlib-metadata
