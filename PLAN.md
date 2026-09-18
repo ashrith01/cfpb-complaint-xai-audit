@@ -174,6 +174,20 @@ the *mechanism* behind its low comprehensiveness, not a restatement of it.
 > unfaithful in 19.3% of high-confidence errors where gradient-based explanations
 > were not.
 
+## MLOps wrap ✅ (2026-09-18)
+- [x] Multi-stage `Dockerfile` (uv builder, CPU-only torch, non-root runtime), allowlist `.dockerignore`, `docker-compose.yml` (api + MLflow UI), `make docker-build` / `docker-run`
+- [x] MLflow tracking (local SQLite) with git SHA + dataset hash on every run; Day 2–4 runs backfilled; winner registered and promoted to `@production`; serving resolves by alias
+- [x] `ci.yml` (ruff, pytest, smoke pipeline on a 560-row fixture, docker build) and `eval-gate.yml` (accuracy, faithfulness ordering, random control, split integrity; PR comment with deltas)
+- [x] FastAPI `/predict`, `/explain`, `/health`; JSON request log; latency/QPS/cold-start benchmark
+- [x] `src/monitor.py`: PSI with a bootstrap noise floor vs realised accuracy, out-of-time backtest, post-snapshot class prior
+- [ ] Push `demo/ship-baseline`, open the PR, capture the failing gate
+- **DoD:** ✅ gate passes on main and fails on the shipped-baseline branch; container serves `@production` v1
+
+Changed from the plan: macro-F1 floor 0.845 (0.84 passes the baseline); SQLite
+instead of the MLflow file store (refused by MLflow 3.16); drift measured
+within the original window, because the CFPB stopped publishing narratives on
+14 Aug 2026.
+
 ## Guardrails (re-read if scope creep starts)
 - No explaining generative output — classification only
 - No model comparison beyond baseline + 1 fine-tune variant

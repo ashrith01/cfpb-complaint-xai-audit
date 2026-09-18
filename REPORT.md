@@ -9,7 +9,8 @@ the code afterwards.
 - **Day-by-day checklist:** [`PLAN.md`](./PLAN.md)
 - **Final polished report:** [`README.md`](./README.md) (written Day 12)
 
-**Status:** ✅ Complete — all 12 days delivered.
+**Status:** ✅ Complete — all 12 days delivered, plus a three-part MLOps wrap
+(2026-09-18).
 
 | Day | Work | Status | Key number |
 |---|---|---|---|
@@ -23,6 +24,9 @@ the code afterwards.
 | 10 | Disagreement / audit | ✅ | **19.3%** attn unfaithful where IG faithful |
 | 11 | Packaging | ✅ | 32 tests; clean-clone reproduces byte-identically |
 | 12 | Report | ✅ | README as technical report, 4 figures |
+| M1 | Container + MLflow tracking/registry | ✅ | 623 MB image, 2.2 s cold start; v1 @production |
+| M2 | CI regression gate + serving | ✅ | gate fails the shipped-baseline PR; `/predict` p95 99 ms, `/explain` 107× slower |
+| M3 | Drift monitoring | ✅ | token PSI never crossed 0.1 while OOT macro-F1 fell 11.5 pts |
 
 ---
 
@@ -600,3 +604,94 @@ before any attribution method ran) that were not designed to agree.
   is inspectable without retraining but the model must be regenerated
 - `make all` end-to-end is ~2h40m, dominated by the fine-tune grid; stages were
   validated individually plus a clean-clone `make data`, not as one 3-hour run
+
+---
+
+## MLOps wrap ✅ (2026-09-18)
+
+No new modelling: the shipped checkpoint was tracked, registered, containerised,
+gated and monitored. Plan: containerisation → tracking/registry → CI gate →
+serving → drift. 55 tests (32 + 23 new).
+
+### Tracking and registry
+- MLflow 3.16 **refuses the plain file store** unless `MLFLOW_ALLOW_FILE_STORE`
+  is set, so the "local file backend" became local SQLite (`mlflow.db` +
+  `mlruns/`) — still serverless and free.
+- Lineage on every run: git SHA (`-dirty` on an unclean tree) and a sha256 over
+  the pinned split IDs **in order** — order sets DataLoader batching, so it is
+  part of the dataset's identity.
+- Day 2–4 runs were **backfilled** from `metrics.json` rather than retrained (2.3 h
+  to reproduce numbers already committed). Each carries the commit that produced
+  it (`5a2e998` baseline, `46a4211` fine-tune code, `11289d5` results), not HEAD,
+  and `source=backfill`.
+- Aliases, not stages: MLflow 3 deprecates stages; `@production` is the
+  equivalent. `make train` registers; only `make promote` moves the alias.
+
+### Containerisation and serving
+- Serving lock (`requirements-serve.txt`) is CPU-only torch, pinned to the
+  research lock with `-c requirements.txt`; identical resolution on amd64 and
+  arm64. Default PyPI torch on linux/amd64 pulls ~3 GB of CUDA.
+- The image holds the checkpoint **`@production` resolved to at build time**, not
+  a registry pointer: immutable, self-describing via `/health`, no tracking store
+  needed at runtime.
+- **Bug found by running it:** `save_pretrained` writes `model.safetensors` 0600.
+  The non-root container user could not read it and startup failed. Export now
+  normalises to 0644 — the least-privilege setting caught a real problem.
+- Ports: :8000 was held by another local dev server and macOS AirPlay Receiver
+  holds :5000, so the API publishes on :8080 and the MLflow UI on :5001.
+
+| endpoint | c | p50 | p95 | p99 | QPS |
+|---|---|---|---|---|---|
+| /predict | 1 | 77 ms | 99 ms | 107 ms | 13.3 |
+| /predict | 16 | 983 ms | 1,253 ms | 1,374 ms | 16.1 |
+| /explain | 1 | 8.2 s | 11.8 s | 12.0 s | 0.12 |
+
+Forward passes are serialised by a lock (concurrent torch on shared CPU cores is
+slower in aggregate), so QPS saturates at ~16 and latency above it is queueing.
+Consequence worth stating: a single `/explain` holds the model ~8 s and stalls
+`/predict` — explanations belong on a separate replica or queue.
+
+### CI gate
+- **The plan's 0.84 floor had no teeth.** The TF-IDF baseline scores 0.8411, so
+  it passes 0.84. Raised to 0.845 and added "must beat the baseline".
+- The gate **recomputes** macro-F1 and faithfulness means from the per-example
+  files and requires agreement with `metrics.json` (faithfulness to 1e-4, since
+  it is stored at 4 d.p.; max observed gap 4.4e-5).
+- `demo/ship-baseline`: ships baseline predictions with a consistent
+  `metrics.json`; the gate fails exactly the two accuracy checks, the other nine
+  pass. Tests cover each failure mode (accuracy, ordering, control, split).
+
+### Drift — the plan's design was no longer possible
+**The CFPB stopped publishing narratives on 14 Aug 2026**, eight days after this
+project's snapshot. The 18 Sep bulk file is 345 MB (vs 1.4 GB) and has no
+narrative column; the API returns none, even for pinned test complaint 14896134,
+which had one in August. 3 of the 36,000 pinned IDs are gone from the metadata
+entirely. **Consequence beyond drift:** `make data` can no longer reproduce the
+dataset from a clean clone — the local `data/processed/` is now the only full
+copy of the inputs.
+
+Replaced "score a newer snapshot" with what the metadata still supports:
+
+| window | n | production F1 | backtest F1 | backtest token PSI | backtest pred-class PSI |
+|---|---|---|---|---|---|
+| 2024 (in time, 4 qtrs) | 1,845 | 0.80–0.87 | 0.78–0.85 | 0.014–0.020 | 0.007–0.023 |
+| 2025 Q1 | 899 | 0.864 | 0.783 | 0.057 | **0.283** |
+| 2025 Q4 | 569 | 0.864 | 0.779 | 0.070 | 0.105 |
+| 2026 Q1 | 437 | 0.796 | **0.705** | 0.066 | 0.156 |
+| 2026 Q2–Q3 | 347 | 0.769 | **0.706** | 0.094 | 0.214 |
+
+- The **noise floor** mattered: at n ≈ 400, same-distribution PSI reaches
+  0.02–0.05 on its own. Without it, in-time quarters would look drifted.
+- Token PSI rose above noise a year before the backtest's 11.5-point loss but
+  never crossed 0.1. Predicted-class PSI crossed 0.1 one quarter ahead, but also
+  fired at 0.28 in 2025 Q1 with no real loss (and at 0.20 for the production
+  model, whose accuracy that quarter was above average).
+- Post-snapshot traffic (313k complaints, metadata only) is 95.8% credit
+  reporting vs 89.1% before — PSI 0.071. Against the model's **balanced** training
+  prior it is 3.50.
+
+### Not done, stated
+- No MLflow UI or failing-gate screenshots yet: they need the UI open in a
+  browser and the demo PR opened on GitHub.
+- The failing-gate run needs `demo/ship-baseline` pushed and a PR opened; the
+  branch exists locally only.

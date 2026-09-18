@@ -117,18 +117,164 @@ taxonomy: [`notebooks/error_analysis.md`](notebooks/error_analysis.md).
 
 ---
 
+## Operations
+
+The classifier is wrapped in a production loop: tracked and registered in
+MLflow, served from a container, gated in CI on the audit's own finding, and
+monitored for drift. Everything runs locally at zero cost.
+
+```
+make backfill   → MLflow runs + registry, v1 promoted to @production
+make docker-build → resolve @production → build/model → cfpb-classifier image
+make docker-run → api :8080  +  MLflow UI :5001
+make gate       → the checks eval-gate.yml runs on every PR
+make monitor    → results/drift_report.json + results/figures/drift.png
+```
+
+### Experiment tracking and registry
+
+Local SQLite store (`mlflow.db`, artifacts in `mlruns/`, both gitignored). Every
+run carries its **git SHA** and a **dataset hash** (sha256 of the 36,000 pinned
+split IDs, in order), so "what is in production and what trained it" is two tags
+on the registered version. The Day 2–4 runs predate tracking and were
+**backfilled from `metrics.json`**, not retrained, and are stamped with the
+commits that produced them rather than today's HEAD.
+
+| run | model | val macro-F1 | test macro-F1 | train time | git SHA |
+|---|---|---|---|---|---|
+| baseline | TF-IDF + LogReg | 0.8445 | 0.8411 | 11 s | `5a2e998` |
+| grid | DistilBERT, lr 2e-5, len 256 | 0.8497 | – | 55.9 min | `46a4211` |
+| grid | DistilBERT, lr 5e-5, len 128 | 0.8430 | – | 26.0 min | `46a4211` |
+| **promoted** | **DistilBERT, lr 5e-5, len 256** | **0.8527** | **0.8495** | **55.8 min** | `46a4211` |
+
+Promotion uses a registry **alias** (`@production`) — MLflow 3's replacement for
+stages — and `make train` registers but never promotes: moving the alias is a
+separate, deliberate `make promote VERSION=n`.
+
+### CI with a regression gate
+
+Two workflows, because they have different jobs. **`ci.yml`** (every push): ruff,
+55 tests, the real `data_prep → train → registry` code on a 560-row fixture for
+one epoch, and a Docker build. **`eval-gate.yml`** (every PR to main) never
+retrains — it gates the committed artifacts and fails the PR if:
+
+- **accuracy** — macro-F1, *recomputed* from `predictions_test.parquet`, falls
+  below 0.845 or stops beating the TF-IDF baseline
+- **ordering** — comprehensiveness no longer ranks IG > SHAP > attention rollout
+- **control** — any method stops beating random-token deletion
+- **integrity** — the pinned split's hash changes, or predictions stop covering
+  exactly that split
+
+Headline numbers are recomputed from the per-example files and must agree with
+`metrics.json`, so hand-editing the summary cannot pass the gate. Results and
+metric deltas against the base branch are posted as a PR comment.
+
+**The floor is 0.845, not the 0.84 first drafted.** The baseline scores 0.8411,
+so 0.84 would have waved through the exact regression the gate exists to catch.
+`demo/ship-baseline` proves it: that branch ships the TF-IDF baseline as the
+production model and the gate fails on both accuracy checks while the other
+nine pass.
+
+### Serving
+
+FastAPI: `POST /predict` (class, confidence, all 8 probabilities), `POST /explain`
+(top-k Integrated Gradients tokens), `GET /health` (registry version and alias,
+model git SHA, dataset hash, serving git SHA). The model loads once at startup;
+the container holds the checkpoint `@production` resolved to at build time, so the image
+is immutable and self-describing. Every request logs one JSON line — latency,
+predicted class, confidence, input length — and never the narrative.
+
+Container on CPU (Docker Desktop, M4 Pro, 10 vCPU), real test narratives:
+
+| endpoint | concurrency | p50 | p95 | p99 | QPS |
+|---|---|---|---|---|---|
+| `/predict` | 1 | 77 ms | 99 ms | 107 ms | 13.3 |
+| `/predict` | 4 | 237 ms | 305 ms | 362 ms | 16.6 |
+| `/predict` | 16 | 983 ms | 1,253 ms | 1,374 ms | 16.1 |
+| `/explain` | 1 | 8.2 s | 11.8 s | 12.0 s | 0.12 |
+| `/explain` | 4 | 33.4 s | 35.5 s | 35.8 s | 0.12 |
+| `/explain` | 16 | 72.2 s | 128.8 s | 133.4 s | 0.12 |
+
+**Explainability has a serving cost, and here is its size: `/explain` is ~107×
+slower than `/predict`** (IG's 50 interpolation steps are 50 forward+backward
+passes). Throughput saturates at ~16 QPS because forward passes are serialised —
+concurrent torch calls on shared CPU cores are slower in aggregate — so latency
+above that is queueing. The design consequence: one `/explain` holds the model
+for ~8 s and stalls `/predict` behind it, so a real deployment would serve
+explanations from a separate replica or queue.
+
+Image: **623 MB** compressed (2.3 GB unpacked; CPU-only torch, multi-stage,
+non-root). Cold start to first successful `/predict`: **2.2 s**.
+
+### Monitoring and drift
+
+**The CFPB stopped publishing complaint narratives on 14 August 2026.** The
+current bulk file has no narrative column and the API returns none — including
+for complaints in this project's pinned split. There is no post-training text to
+score, so drift is measured on what the data still supports: quarterly windows of
+the held-out test set (dates joined from current metadata), an **out-of-time
+backtest** (TF-IDF refit on 2024 rows only, scored on every later quarter — the
+only way to ask whether PSI precedes accuracy loss without retraining
+DistilBERT), and class-prior drift on the 313k complaints received after the
+snapshot. Each PSI is reported against a bootstrap noise floor, because quarters
+hold only 300–900 complaints.
+
+![drift](results/figures/drift.png)
+
+Latest window (2026 Q2–Q3, n = 347) against the training reference:
+
+| feature | PSI, production | PSI, backtest | verdict |
+|---|---|---|---|
+| narrative length | 0.106 | 0.118 | moderate |
+| top-500 token distribution | 0.050 | 0.094 | stable |
+| predicted-class distribution | 0.229 | 0.214 | moderate |
+| **macro-F1 on window** | **0.769** (0.850 overall) | **0.706** (0.821 in-time) | |
+
+**Did PSI warn before accuracy moved? Yes, but not in the way its thresholds
+assume.** Out of time, the backtest's first year stays inside its own in-time
+quarter-to-quarter range (0.78–0.85); the real loss arrives in 2026, **−11.5
+points** of macro-F1. Two signals preceded it:
+
+- **Token-distribution PSI** left its noise floor in the very first out-of-time
+  quarter and climbed steadily (≈0.02 in time → 0.06–0.09), a year ahead of the
+  drop — but it **never crossed 0.1**, so on the conventional thresholds it read
+  "stable" the whole time.
+- **Predicted-class PSI** crossed 0.1 in 2025 Q4, one quarter ahead. It also
+  spiked to 0.28 in 2025 Q1 with no real loss, and to 0.20 for the production
+  model in that same quarter, when accuracy was *above* average. It detects
+  label mix, with false alarms.
+
+The early warning was a rising, above-noise trend on the text itself; fixed
+0.1 / 0.25 bands would have missed it. (Six out-of-time quarters is a small
+sample: Spearman ρ between token PSI and F1 loss is 0.77.)
+
+Two further results. Even the production model, trained on every quarter, scores
+worst on the most recent one (0.769) — the newest complaints are both the most
+drifted and the least represented. And post-snapshot traffic is **95.8% credit
+reporting** against 89.1% before (PSI 0.071, stable) — but against the
+**balanced** prior the model was trained on, the PSI is **3.50**. The headline
+macro-F1 describes a balanced world production never sees.
+
+---
+
 ## Reproducing
 
 ```bash
 make setup      # uv venv (Python 3.14) + uv pip sync
-make test       # 32 tests
+make test       # 55 tests
 make all        # data → train → evaluate → explain → audit → figures
 ```
 
-`data/splits.json` pins all 36,000 complaint IDs, so `make data` **reproduces the
+`data/splits.json` pins all 36,000 complaint IDs, so `make data` **reproduced the
 exact dataset** rather than resampling a newer CFPB snapshot — verified
-byte-identical from a clean clone. Use `make data --resample` to draw fresh (and
-expect every downstream number to change).
+byte-identical from a clean clone in August 2026.
+
+> **That no longer works from a clean clone.** On 14 August 2026 the CFPB stopped
+> publishing narratives; current snapshots carry no narrative column, so the pinned
+> IDs cannot be joined back to their text. Everything downstream of `make data`
+> still reproduces from an existing `data/processed/`, and every audit result is
+> inspectable from the committed artifacts. The CI smoke pipeline runs the same
+> code on a committed fixture drawn from the already-published test split.
 
 Runtime on an M4 Pro (16 GB, MPS): data ~7 min · train ~2 h 10 m (3-config grid)
 · explain ~27 min · audit ~2 min.
@@ -158,6 +304,9 @@ test-set-level claims can be made honestly.
   class-conditioned, so the same map explains every class. Its poor showing
   quantifies what class-conditioning is worth; it is not a claim that all
   attention-based methods fail.
+- **Drift is measured within the original window, not after it.** Post-August-2026
+  complaints have no text, so the out-of-time evidence comes from a TF-IDF
+  backtest, not from the production DistilBERT.
 - The fine-tuned checkpoint (255 MB) is not committed. All derived results are —
   metrics, attributions, the example set, figures — so the audit is inspectable
   without retraining.
@@ -167,7 +316,9 @@ test-set-level claims can be made honestly.
 ## Data, provenance and reuse
 
 **Source.** [CFPB Consumer Complaint Database](https://www.consumerfinance.gov/data-research/consumer-complaints/),
-bulk archive fetched 2026-08-06. `data/raw/SOURCE.txt` records the exact snapshot
+bulk archive fetched 2026-08-06 — eight days before the CFPB
+[stopped publishing complaint narratives](https://www.consumerfinance.gov/about-us/newsroom/the-cfpb-to-cease-discretionary-publication-of-complaint-narratives-and-visualizations/)
+(14 Aug 2026; previously published narratives moved to its FOIA Reading Room). `data/raw/SOURCE.txt` records the exact snapshot
 — URL, byte count and the server's `Last-Modified` — because the database grows
 daily and results are only reproducible against a known one. As a work of the US
 federal government the database is in the **public domain**; the CFPB publishes
@@ -190,9 +341,13 @@ not already published.
 **What is redistributed, and why.** The 5,400 test narratives
 (`results/predictions_test.parquet`), the 500-example audit set, and the
 per-example attributions — so the audit is inspectable without a 2-hour retrain.
-Nothing depends on these copies: `data/splits.json` pins all 36,000 complaint
-IDs, so `make data` re-fetches from the CFPB directly and reproduces the dataset
-byte-identically.
+The CI fixture (`tests/fixtures/complaints_sample.csv.zip`, 560 rows) is a subset
+of those same test narratives and adds none. `data/complaint_dates.csv` and
+`data/product_volume_by_month.csv` hold only complaint IDs, dates, products and
+counts from the September 2026 snapshot — no text. These copies were a
+convenience when written; since the CFPB withdrew narratives from its public
+database, they are the only way to inspect the audit's inputs without a FOIA
+request.
 
 **Licence.** Code and written analysis are MIT ([`LICENSE`](LICENSE)). The
 complaint data is public domain and is not licensed by me — cite the CFPB as its
@@ -215,7 +370,17 @@ src/
 │   └── attention_rollout.py
 ├── faithfulness.py        # comprehensiveness + sufficiency + random control
 ├── audit.py               # disagreement, brand-token test, junk-token audit
-└── report_figures.py      # example walkthroughs
+├── report_figures.py      # example walkthroughs
+├── tracking.py            # MLflow setup, git SHA + dataset hash lineage
+├── registry.py            # backfill, register, promote (@production), export
+├── serve.py               # FastAPI: /predict, /explain, /health
+├── loadtest.py            # latency percentiles, QPS, cold start
+├── gate.py                # CI regression gate
+├── monitor.py             # PSI drift vs realised accuracy
+└── smoke_check.py         # asserts the CI smoke run wrote everything
+
+.github/workflows/         # ci.yml (every push), eval-gate.yml (PRs to main)
+Dockerfile, docker-compose.yml, requirements-serve.txt
 
 results/metrics.json       # every number in this README
 results/headline_finding.md
